@@ -176,7 +176,7 @@ int main(int argc, char* args[]) {
         SDL_Texture* menu3Texture = SDL_CreateTextureFromSurface(renderer, menu3Surface);
         SDL_FreeSurface(menu3Surface);
         texture = menuTexture;
-        int speed = 16;
+        int speed = 14;
         int demsp = 0;
         // Xử lý sự kiện
         std::thread t1([&music]() {
@@ -312,10 +312,6 @@ int main(int argc, char* args[]) {
             SDL_FreeSurface(tooearlySurface);
             
             
-            
-            
-
-            SDL_Delay(1000);
             t1 = std::thread([&music]() {
                 Mix_PlayMusic(music, -1);
                 });
@@ -329,6 +325,7 @@ int main(int argc, char* args[]) {
             int good = 0;
             int miss = 0;
             int tooearly = 0;
+            speed = 14;
             while (gameplay) {
                 time_t currentTime = std::time(nullptr);
                 time_t elapsedTime = currentTime - startTime;
@@ -355,7 +352,7 @@ int main(int argc, char* args[]) {
                                 // gameplay = false;
                                //  noods.resize(0);
                             }
-                            x.y += 6;
+                            x.y += 5;
 
                             SDL_Rect mouseRect = { x.x,x.y, 100, 100 };
                             SDL_RenderCopyEx(renderer, x.a, NULL, &mouseRect, 0.0, NULL, SDL_FLIP_NONE);
@@ -378,14 +375,14 @@ int main(int argc, char* args[]) {
                         }
                         demsp++;
                         if (demsp >= 15) {
-                            if (speed > 8) {
+                            if (speed > 7) {
                                 speed -= 1;
                             }
                             demsp = 0;
                         }
                     }
                 }
-
+                if (noods.size() > 50) noods.erase(noods.begin(), noods.begin() + 30);
                 if (demkey == 0) {
 
                     for (Noods& x : noods) {
@@ -700,6 +697,11 @@ int main(int argc, char* args[]) {
 								tooearly = 0;
                                 //delete texture
                                 SDL_DestroyTexture(backgroundTexture);
+                                SDL_DestroyTexture(goodTexture);
+                                SDL_DestroyTexture(missTexture);
+                                SDL_DestroyTexture(perfectTexture);
+                                SDL_DestroyTexture(tooearlyTexture);
+                                //delete end
 								break;
 							}
                            
@@ -715,14 +717,17 @@ int main(int argc, char* args[]) {
                     
                 }
                 cout << elapsedTime << " " << noods.size() << endl;
+               
             }
             //ìf music end reapeat
             //reset time
             startTime = std::time(nullptr);
+         
 
         }
         //close music
         Mix_FreeMusic(music);
+       
     }
 
    
