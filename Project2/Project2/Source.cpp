@@ -31,12 +31,14 @@ vector<int> generateRandomNumbers(int min, int max, int n) {
 	return result;
 }
 
-const int positionnood[] = { 59,205,331,605,751,876 };
-const int numbernood[]={1,1,1,1,1,1,2,2,2,2,2,3,3,1,3,4,1,4,6,2};
+const int positionnood[] = { 59,205,331,605,751,876 };//position of nood
+const int numbernood[]={1,1,1,1,1,1,2,2,2,2,2,3,3,1,3,4,1,4,6,2};//rate of random number of nood
+//funtion to random number of nood
 int creatnumberofnood() {
 	int numberofnood = generateRandomNumber(1,20);
 	return numbernood[numberofnood];
 }
+//funtion to random position of nood with number of nood
 vector<int> creatpositionofnood(int numbernood) {
     vector<int> result;
     if (numbernood % 2 == 0) {
@@ -57,6 +59,7 @@ vector<int> creatpositionofnood(int numbernood) {
     }
     return result;
 }
+//struct of nood
 struct Noods {
     SDL_Texture* a;
     int x=0, y=0;
@@ -111,13 +114,12 @@ int main(int argc, char* args[]) {
     nood.x = 59;
     nood.y = 0;
     nood.check = true;
+    //creat vector nood for gameplay
     vector<Noods> noods;
     noods.push_back(nood);
-
-    // Update renderer
     SDL_RenderPresent(renderer);
 
-
+    //loop of opentexture go to game if mouse click
     while (true) {
         //if mouse click
         SDL_Event e;
@@ -126,40 +128,31 @@ int main(int argc, char* args[]) {
             break;
         }
     }
-    //delete opentexture
     SDL_DestroyTexture(openTexture);
- 
-    // Texture mặc định
-  
-
-    // Tạo cửa sổ
-    // Main loop
     bool quit = false;
     SDL_Event e;
+    // variable to control speed and number of nood
     float demSpeed = 0;
     float demWave = 0;
     int demNood = 0;
-    // Khởi tạo SDL
+    int speed = 14;
+    int demsp = 0;
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return 1;
     }
-
-    // Khởi tạo SDL_mixer
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
         printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
         return 1;
     }
 
-    // Load file nhạc MP3
+    // load menu music
     Mix_Music* music = Mix_LoadMUS("music/menu.mp3");
     if (music == NULL) {
         printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
         return 1;
     }
-    // creat a SDL_Thread to play music
-    
-
+    //main loop start menu 
     while (!quit) {
         SDL_Surface* menuSurface = IMG_Load("Image/Menu.png");
         SDL_Texture* menuTexture = SDL_CreateTextureFromSurface(renderer, menuSurface);
@@ -176,16 +169,14 @@ int main(int argc, char* args[]) {
         SDL_Texture* menu3Texture = SDL_CreateTextureFromSurface(renderer, menu3Surface);
         SDL_FreeSurface(menu3Surface);
         texture = menuTexture;
-        int speed = 14;
-        int demsp = 0;
-        // Xử lý sự kiện
+        //thread to play menu music and play again if music menu end
         std::thread t1([&music]() {
             Mix_PlayMusic(music, -1);
-            // if music end reapeat
             if (music == NULL) Mix_PlayMusic(music, -1);
 
             });
         t1.join();
+        //menu loop
         while (true) {
 
             while (SDL_PollEvent(&e) != 0) {
@@ -196,17 +187,16 @@ int main(int argc, char* args[]) {
 
             SDL_Rect destinationRect = { 0,0.0, 1080, 810 };
             SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
-
-            // Update renderer
             SDL_RenderPresent(renderer);
-            //if mouse in position
+   //get mouse position
             int x, y;
             SDL_GetMouseState(&x, &y);
-            //if mouse don't
+            //action with each button of menu be clicked
+            //play button
             if (x > 400 && x < 700) {
                 if (y > 350 && y < 475) {
                     texture = menu1Texture;
-                    //exit program if mouse click   
+                    //go to gameplay if mouse click in play button
                     SDL_PollEvent(&e);
                     if (e.type == SDL_MOUSEBUTTONDOWN) {
                         gameplay = true;
@@ -214,14 +204,12 @@ int main(int argc, char* args[]) {
                         break;
                     }
                 }
+                //how to play button
                 else if (y > 490 && y < 600) {
                     texture = menu2Texture;
-                    //if mouse click
-                    
                     SDL_PollEvent(&e);
-                    
                     if (e.type == SDL_MOUSEBUTTONDOWN) {
-						//pause music and display how to play
+						//pause music and display how to play texture
                         Mix_PauseMusic();
 						SDL_Surface* howtoplaySurface = IMG_Load("Image/how to play.png");
 						SDL_Texture* howtoplayTexture = SDL_CreateTextureFromSurface(renderer, howtoplaySurface);
@@ -230,23 +218,22 @@ int main(int argc, char* args[]) {
 						SDL_RenderCopyEx(renderer, howtoplayTexture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
 						SDL_RenderPresent(renderer);
                         SDL_Delay(500);
-						//if mouse click
+						//how to play loop
                         while (true) {
 							SDL_PollEvent(&e);
-                            //if mouse click
+                            //go back to menu if mouse click
                             if (e.type == SDL_MOUSEBUTTONDOWN) {
-								//delete howtoplay texture
 								SDL_DestroyTexture(howtoplayTexture);
 								break;
                             }
 						}
-						//delete howtoplay texture
 						SDL_DestroyTexture(howtoplayTexture);
                         //music resume
-                        
+                        Mix_ResumeMusic();
 					}
                     
                 }
+                //exit button
                 else if (y > 600 && y < 700) {
 
                     texture = menu3Texture;
@@ -260,36 +247,29 @@ int main(int argc, char* args[]) {
                     }
 
                 }
+				//if mouse not in button
                 else {
                     texture = menuTexture;
                 }
             }
+			//if mouse not in button
             else {
                 texture = menuTexture;
             }
-           // SDL_Delay(5);
         }
-        // Load file nhạc MP3
+        // Load gameplay music
         Mix_Music* music = Mix_LoadMUS("music/AdhesiveWombat - 8 Bit Adventure.mp3");
         if (music == NULL) {
             printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
             return 1;
         }
-
-        // Phát nhạc
-       
-        
-
-
-
-
+        //setup for gameplay
         if (gameplay == true) {
             //delete menu texture
             SDL_DestroyTexture(menuTexture);
             SDL_DestroyTexture(menu1Texture);
             SDL_DestroyTexture(menu2Texture);
             SDL_DestroyTexture(menu3Texture);
-            //gameplay
             SDL_Surface* backgroundSurface = IMG_Load("Image/gameplay.png");
             if (backgroundSurface == NULL) {
                 printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
@@ -311,12 +291,12 @@ int main(int argc, char* args[]) {
             SDL_Texture* tooearlyTexture = SDL_CreateTextureFromSurface(renderer, tooearlySurface);
             SDL_FreeSurface(tooearlySurface);
             
-            
+            //thread to play gameplay music
             t1 = std::thread([&music]() {
                 Mix_PlayMusic(music, -1);
                 });
             t1.join();
-            //stopwatch with ctime
+            //variable for gameplay
             time_t startTime = std::time(nullptr);
             int demkey = 0;
             int demperfect = 0;
@@ -326,10 +306,11 @@ int main(int argc, char* args[]) {
             int miss = 0;
             int tooearly = 0;
             speed = 14;
+            //gameplay loop
             while (gameplay) {
+                // check time after each loop
                 time_t currentTime = std::time(nullptr);
                 time_t elapsedTime = currentTime - startTime;
-                //display background
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
                         quit = true;
@@ -338,22 +319,18 @@ int main(int argc, char* args[]) {
                 destinationRect = { 0,0, 1080, 810 };
                 SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
                 demSpeed += 1;
-              //  if (size(noods) > 100) noods.erase(noods.begin(), noods.begin() + 80);
+                //control speed, create wave nood
                 if (demSpeed >= 1) {
                     demSpeed = 0;
                     for (Noods& x : noods) {
-
                         if (x.check == true) {
                             if (x.y >= 810) {
                                 x.check = false;
                                 choice = 0;
                                 demperfect = 20;
                                 miss++;
-                                // gameplay = false;
-                               //  noods.resize(0);
                             }
-                            x.y += 5;
-
+                            x.y += 5;//move nood
                             SDL_Rect mouseRect = { x.x,x.y, 100, 100 };
                             SDL_RenderCopyEx(renderer, x.a, NULL, &mouseRect, 0.0, NULL, SDL_FLIP_NONE);
                         }
@@ -361,8 +338,10 @@ int main(int argc, char* args[]) {
                       
                     }
                     demWave +=2;
+                    // wave of nood
                     if (demWave >= 125) {
                         demWave = 0;
+                        //create new wave nood
                         vector<int> position = creatpositionofnood(creatnumberofnood());
                         
                         if (elapsedTime <= 268 && !(elapsedTime >= 206 && elapsedTime <= 210)) {
@@ -373,6 +352,7 @@ int main(int argc, char* args[]) {
 
                             }
                         }
+                        // increase speecd of nood follow time
                         demsp++;
                         if (demsp >= 15) {
                             if (speed > 7) {
@@ -383,14 +363,12 @@ int main(int argc, char* args[]) {
                     }
                 }
                 if (noods.size() > 50) noods.erase(noods.begin(), noods.begin() + 30);
-                if (demkey == 0) {
-
+                if (demkey == 0) {//demkey to reduce stick key
+                    //main gameplay get point and check correct nood be pressed
                     for (Noods& x : noods) {
                         if (x.check == true && x.y >= 525 && x.y <= 800) {
                             if (x.x == 59 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_S]) {
                                 x.check = false;
-
-                               
                                 if (x.y >= 525 && x.y < 575) { choice = 1; demperfect = 20; tooearly++; }
                                 else if ((x.y >= 575 && x.y < 630) || (x.y >= 740 && x.y < 800)) { choice = 2; demperfect = 20; good++; }
                                 else if (x.y >= 630 && x.y < 740) { choice = 3; demperfect = 20; perfect++; }
@@ -461,14 +439,13 @@ int main(int argc, char* args[]) {
                         destinationRect = {230,200, 600, 450};
                         SDL_RenderCopyEx(renderer, pauseTexture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
                         SDL_RenderPresent(renderer);
-                        //music pause
                         while (true) {
                             //if mouse click
                             SDL_PollEvent(&e);
                             if (e.type == SDL_MOUSEBUTTONDOWN) {
                                 int x, y;
                                 SDL_GetMouseState(&x, &y);
-                                // Xác định xem người dùng đã nhấn vào nút nào
+                                //check button be clicked
                                 if (x > 450 && x < 600 && y > 350 && y < 500) {
                                     // Resume button clicked
                                     Mix_ResumeMusic();
@@ -486,9 +463,7 @@ int main(int argc, char* args[]) {
                                     good = 0;
                                     miss = 0;
                                     tooearly = 0;
-                                    //time reset
                                     startTime = std::time(nullptr);
-
                                     break;
                                 }
                                 else if (y > 510 && y < 580&&x>610&&x<730) {
@@ -498,18 +473,17 @@ int main(int argc, char* args[]) {
 								}
 							}
                         }
-                        
-                        //delete pause texture
                         SDL_DestroyTexture(pauseTexture);
                         demkey = 10;
                     }
 
                 }
                 else demkey--;
+                //code for display result of nood be pressed
                 if (demperfect > 0) {
                     demperfect--;
+                    //thread to display result
                     thread t2([&renderer, perfectTexture,goodTexture,missTexture,tooearlyTexture,choice]() {
-                        //display perfect
                         SDL_Rect destinationRect = { 430,550,200,250 };
                         if (choice == 0) SDL_RenderCopyEx(renderer, missTexture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
 						else if (choice == 1) SDL_RenderCopyEx(renderer, tooearlyTexture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
@@ -520,34 +494,24 @@ int main(int argc, char* args[]) {
 
                     t2.join();
                 }
-
+                //renderer gameplay
                 SDL_RenderPresent(renderer);
-               
-
-
+              //control fps by and speed by variable speed
                 SDL_Delay(speed);
-                //elapsedTime>=1
-                //(size(noods)==0||noods.back().check == false) && elapsedTime >= 272
+               //check to end game
                 if ((size(noods) == 0 || noods.back().check == false) && elapsedTime >= 271) {
                     Mix_HaltMusic();
-                    //play end music 
-                  //creat music end
+                    //end music
                     Mix_Music* end = Mix_LoadMUS("music/end.mp3");
                     if (end == NULL) {
 						printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
 						return 1;
 					}
-                    //play music end
-                    //increase volume
-                    
                     Mix_PlayMusic(end, 1);
-                    //while music end
                     SDL_Delay(400);
                     gameplay = false;
                     noods.resize(0);
-                    //delete texture
-                    //music stop
-                    
+                    //complete game and caculate point and display
                     SDL_Surface* complete0Surface = IMG_Load("Image/complete0.png");
                     SDL_Texture* complete0Texture = SDL_CreateTextureFromSurface(renderer, complete0Surface);
                     SDL_FreeSurface(complete0Surface);
@@ -580,7 +544,7 @@ int main(int argc, char* args[]) {
 						
 						SDL_RenderCopyEx(renderer, complete0Texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
 					}
-                   //use tff to write string "Your point is: " + point in line 1
+                   //use ttf to write completed art
                    thread t3([&renderer, point, perfect, good, miss, tooearly]() {
                    TTF_Init();
                    TTF_Font* font = TTF_OpenFont("Front/font.ttf", 24);
@@ -622,51 +586,33 @@ int main(int argc, char* args[]) {
                     texture = SDL_CreateTextureFromSurface(renderer, surface);
                     textRect = { 325,400, surface->w, surface->h };
                    SDL_RenderCopy(renderer, texture, NULL, &textRect);
-                   //wirite string Perfect: + perfect in line 2
                    surface = TTF_RenderText_Solid(font, ("Perfect: " + to_string(perfect)).c_str(), color);
                    texture = SDL_CreateTextureFromSurface(renderer, surface);
                    textRect = { 325,450, surface->w, surface->h };
                    SDL_RenderCopy(renderer, texture, NULL, &textRect);
-                   //wirite string Good: + good in line 3
                    surface = TTF_RenderText_Solid(font, ("Good: " + to_string(good)).c_str(), color);
                    texture = SDL_CreateTextureFromSurface(renderer, surface);
                    textRect = { 325,500, surface->w, surface->h };
                    SDL_RenderCopy(renderer, texture, NULL, &textRect);  
-                   //wirite string error:+(miss+tooearly) in line 4
                    surface = TTF_RenderText_Solid(font, ("Error: " + to_string(miss+tooearly)).c_str(), color);
                    texture = SDL_CreateTextureFromSurface(renderer, surface);
                     textRect = { 325,550, surface->w, surface->h };
                     SDL_RenderCopy(renderer, texture, NULL, &textRect);
-                    //in line 5 if error=0 and good=0 wirite string "So Amazing, You are perfect" else if error=0 and good>0 wirite string "Great" else if error>0 and (good+perrfect)>70%total wirite string "Good" else if error>0 and (good+perrfect)>50%total wirite string "Not bad but you can better" else wirite string "You need to practice more"
-                   
-                    //delete texture
 					SDL_DestroyTexture(texture);
-					//delete surface
 					SDL_FreeSurface(surface);
-					//close font
 					TTF_CloseFont(font);
-					//quit ttf
 					TTF_Quit();
 					});
 					t3.join();
-					// Update renderer
 					SDL_RenderPresent(renderer);
-                    
-
-                   //delete texture
-                    
-                   
-
-
-                    //if mouse click break
+                    //completed loop
                     while (true) {
-						//if mouse click
+						//check button be clicked
 						SDL_PollEvent(&e);
                         if (e.type == SDL_MOUSEBUTTONDOWN) {
-							//if position of mouse
                             int x, y;
 							SDL_GetMouseState(&x, &y);
-							// Xác định xem người dùng đã nhấn vào nút nào
+							//replay button
                             if (x > 230&& x <400 && y > 620 && y < 800) {
                                 gameplay = true;
                                 noods.resize(0);
@@ -683,8 +629,8 @@ int main(int argc, char* args[]) {
                                 tooearly = 0;
                                 break;
 							}
+                            //quit button
                             else if (x > 680 && x < 860 && y > 610 && y < 780) {
-								// Quit button clicked
 								noods.resize(0);
                                 std::thread t1([&music]() {
 									Mix_PlayMusic(music, -1);
@@ -695,35 +641,28 @@ int main(int argc, char* args[]) {
 								good = 0;
 								miss = 0;
 								tooearly = 0;
-                                //delete texture
                                 SDL_DestroyTexture(backgroundTexture);
                                 SDL_DestroyTexture(goodTexture);
                                 SDL_DestroyTexture(missTexture);
                                 SDL_DestroyTexture(perfectTexture);
                                 SDL_DestroyTexture(tooearlyTexture);
-                                //delete end
 								break;
 							}
                            
 						}
 					}
-                    //delete texture
                     SDL_DestroyTexture(complete0Texture);
                     SDL_DestroyTexture(complete1Texture);
                     SDL_DestroyTexture(complete2Texture);
                     SDL_DestroyTexture(complete3Texture);
-                    //delete end
                     Mix_FreeMusic(end);
                     
                 }
-                cout << elapsedTime << " " << noods.size() << endl;
+                //check time
+                cout << elapsedTime<< endl;
                
             }
-            //ìf music end reapeat
-            //reset time
             startTime = std::time(nullptr);
-         
-
         }
         //close music
         Mix_FreeMusic(music);
@@ -731,7 +670,7 @@ int main(int argc, char* args[]) {
     }
 
    
-    // Giải phóng bộ nhớ và đóng SDL
+    // endgame
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
