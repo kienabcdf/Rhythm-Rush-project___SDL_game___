@@ -71,6 +71,9 @@
     <Image Include="how to play.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Image\longnood.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Media Include="AdhesiveWombat - 8 Bit Adventure.mp3">

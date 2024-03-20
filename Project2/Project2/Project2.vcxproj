@@ -141,6 +141,7 @@
     <Image Include="gameplay.png" />
     <Image Include="good.png" />
     <Image Include="how to play.png" />
+    <Image Include="Image\longnood.png" />
     <Image Include="Menu.png" />
     <Image Include="Menu1.png" />
     <Image Include="Menu2.png" />
