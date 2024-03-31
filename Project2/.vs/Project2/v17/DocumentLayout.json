@@ -5,9 +5,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{E890861A-5B30-4DE3-978E-83CD16B7D799}|Project2\\Project2.vcxproj|C:\\Users\\ttk08\\OneDrive\\Documents\\GitHub\\project\\Project2\\Project2\\Source.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{E890861A-5B30-4DE3-978E-83CD16B7D799}|Project2\\Project2.vcxproj|solutionrelative:Project2\\Source.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ttk08\\source\\repos\\Project2\\Project2\\Source.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -35,22 +32,9 @@
               "RelativeDocumentMoniker": "Project2\\Source.cpp",
               "ToolTip": "C:\\Users\\ttk08\\OneDrive\\Documents\\GitHub\\project\\Project2\\Project2\\Source.cpp",
               "RelativeToolTip": "Project2\\Source.cpp",
-              "ViewState": "AQIAAO8BAAAAAAAAAAAiwBQCAABSAAAA",
+              "ViewState": "AQIAAFkAAAAAAAAAAAAAAIICAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-02-22T10:11:15.206Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Source.cpp",
-              "DocumentMoniker": "C:\\Users\\ttk08\\source\\repos\\Project2\\Project2\\Source.cpp",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\source\\repos\\Project2\\Project2\\Source.cpp",
-              "ToolTip": "C:\\Users\\ttk08\\source\\repos\\Project2\\Project2\\Source.cpp",
-              "RelativeToolTip": "..\\..\\..\\..\\..\\source\\repos\\Project2\\Project2\\Source.cpp",
-              "ViewState": "AQIAAH0BAAAAAAAAAAAAAFgBAAAjAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-03-20T17:10:14.85Z",
               "EditorCaption": ""
             }
           ]
