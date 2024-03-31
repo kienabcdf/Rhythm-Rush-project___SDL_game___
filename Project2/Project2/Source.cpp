@@ -345,6 +345,7 @@ int main(int argc, char* args[]) {
             int tooearly = 0;
             int waitlongnood = 0;
             speed = 6;
+            maxWave = 125;
             //gameplay loop
             while (gameplay) {
                 // check time after each loop
@@ -410,7 +411,15 @@ int main(int argc, char* args[]) {
                             }
                             else {
                                 int length = generateRandomNumber(250, 500);
-                                for (int i = 0; i < position.size(); i++) {
+                                int ranDom = 0;
+                                if (position.size() >= 4) {
+                                    while (true) {
+                                        ranDom = generateRandomNumber(0, size(position));
+                                        if (ranDom == 0 || ranDom == size(position) / 2) break;
+                                    }
+
+                            }
+                                for (int i = 0; i < position.size()-ranDom; i++) {
                                     Longnoods* longnood = new Longnoods;
                                     longnood->a = longnoodTexture;
                                     longnood->x = positionnood[position[i] - 1];
@@ -422,17 +431,28 @@ int main(int argc, char* args[]) {
                                     noods.back()->type = 1;
 
                                 }
+                                for (int i = position.size() - ranDom; i < position.size(); i++) {
+									Noods* nood = new Noods;
+									nood->a = noodTexture;
+									nood->x = positionnood[position[i] - 1];
+									nood->y = 0-length/2;
+									nood->check = true;
+                                    nood->type = 0;
+									noods.push_back(nood);
+								}
                                 waitlongnood = length / speed * 2 + maxWave;
                             }
                         }
                         // increase speecd of nood follow time
                         demsp++;
                         if (demsp >= 23) {
-                            if (speed < 12) {
+                            
+                            if (maxWave > 60&&(demsp==23||demsp==40)) maxWave -= 5;
+                            if (speed < 12&&demsp>=40) {
                                 speed += 1;
+                                demsp = 0;
                             }
-                            if (maxWave > 60) maxWave -= 5;
-                            demsp = 0;
+                          
                         }
                     }
                     else if (waitlongnood > 0) waitlongnood -= 3;
@@ -576,7 +596,7 @@ int main(int argc, char* args[]) {
                         }
                         else if(!check&&x->check==true){
                             if (x->y > 800) { x->check = false; continue; }
-                            cout << " " << perfect << " " << good << " " << miss << " " << tooearly << endl;
+                            
                             Longnoods* y = (Longnoods*)x;
                             if (y->isbeinghold == false && (y->y + y->length > 800)&&(y->y<750)) {
                                 miss++; choice = 0; demperfect = 5;
@@ -684,6 +704,15 @@ int main(int argc, char* args[]) {
                                     miss = 0;
                                     tooearly = 0;
                                     startTime = std::time(nullptr);
+                                    demkey = 0;
+                                    demperfect = 0;
+                                    demsleep = 0;
+                                    demSpeed = 0;
+                                    demWave = 0;
+                                    demNood = 0;
+                                    speed = 6;
+                                    demsp = 0;
+                                    maxWave = 125;
                                     break;
                                 }
                                 else if (y > 510 && y < 580 && x>610 && x < 730) {
@@ -859,6 +888,8 @@ int main(int argc, char* args[]) {
                                 miss = 0;
                                 tooearly = 0;
                                 demsleep = 0;
+                                speed= 6;
+                                maxWave = 125;
                                 break;
 							}
                             //quit button
@@ -874,6 +905,9 @@ int main(int argc, char* args[]) {
 								miss = 0;
 								tooearly = 0;
                                 demsleep = 0;
+                                speed = 6;
+                                maxWave = 125;
+
                                 SDL_DestroyTexture(backgroundTexture);
                                 SDL_DestroyTexture(goodTexture);
                                 SDL_DestroyTexture(missTexture);
@@ -892,7 +926,8 @@ int main(int argc, char* args[]) {
                     
                 }
                 //check time
-                cout << elapsedTime<< endl;
+                cout << elapsedTime<<" ";
+                cout<<speed<<" "<<maxWave<<endl;
                
             }
             startTime = std::time(nullptr);
