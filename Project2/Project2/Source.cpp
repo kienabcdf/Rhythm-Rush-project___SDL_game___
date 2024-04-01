@@ -15,12 +15,15 @@ using namespace std;
 
 //creat a funtion to generate random number from seed time
 int generateRandomNumber(int min, int max) {
-	static bool first = true;
-    if (first) {
-		srand(time(NULL));
-		first = false;
-	}
-	return min + rand() % ((max + 1) - min);
+    // Use the current time as the seed
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+
+    // Initialize a random number generator
+    std::default_random_engine generator(seed);
+
+    // Generate a random number between min and max
+    std::uniform_int_distribution<int> distribution(min, max);
+    return distribution(generator);
 }
 //creat a funtion to generate n random numbers from seed time
 vector<int> generateRandomNumbers(int min, int max, int n) {
@@ -300,6 +303,28 @@ int main(int argc, char* args[]) {
             printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
             return 1;
         }
+        vector<Mix_Chunk*> tikmusiclist(3);
+      tikmusiclist[0] = Mix_LoadWAV("music/tik1.mp3");
+      if (tikmusiclist[0] == NULL) {
+			printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
+			return 1;
+		}
+      tikmusiclist[1] = Mix_LoadWAV("music/tik2.mp3");
+      if (tikmusiclist[1] == NULL) {
+          printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
+          return 1;
+      }
+      tikmusiclist[2] = Mix_LoadWAV("music/tik3.mp3");
+      if (tikmusiclist[2] == NULL) {
+		  printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
+		  return 1;
+      }
+     
+     //chỉnh âm lượng max cho các tik music
+     Mix_VolumeChunk(tikmusiclist[0], MIX_MAX_VOLUME );
+     Mix_VolumeChunk(tikmusiclist[1], MIX_MAX_VOLUME );
+     Mix_VolumeChunk(tikmusiclist[2], MIX_MAX_VOLUME );
+
         //setup for gameplay
         if (gameplay == true) {
             //delete menu texture
@@ -391,10 +416,22 @@ int main(int argc, char* args[]) {
 				}
                 demlight++;
                 destinationRect = { 0,0, 1080, 810 };
-                Uint8 brightness = 200 * (sin(SDL_GetTicks() / 500.0) + 1) / 2+50; // Tạo hiệu ứng nhấp nháy
+                Uint8 brightness = 150 * (sin(SDL_GetTicks() / 500.0) + 1) / 2+105; // Tạo hiệu ứng nhấp nháy
                 SDL_SetTextureColorMod(texture, brightness, brightness, brightness);
                 SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
                 demSpeed += 1;
+               
+                if (elapsedTime == 210) {
+                    //chỉnh âm lương cho voice
+                    Mix_Chunk* voicemusic = Mix_LoadWAV("music/voice.mp3");
+                    if (voicemusic == NULL) {
+                        printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
+                        return 1;
+                    }
+                    Mix_VolumeChunk(voicemusic, MIX_MAX_VOLUME);
+                   Mix_PlayChannel(-1, voicemusic, 0);
+                   
+                }
                 //control speed, create wave nood
                 if (demSpeed >= 1) {
                     demSpeed = 0;
@@ -534,6 +571,15 @@ int main(int argc, char* args[]) {
 
                                     }
                                     demsleep = 0;
+                                    
+                                    thread tikMusicThread([&tikmusiclist]() {
+
+                                        Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
+
+                                        });
+
+                                 
+                                    tikMusicThread.detach();
                                 }
                                 else if (x->x == 205 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_D]) {
                                     if (x->type == 0) x->check = false;
@@ -549,6 +595,15 @@ int main(int argc, char* args[]) {
                                         y->isbeinghold = true;
                                     }
                                     demsleep = 0;
+                                    thread tikMusicThread([&tikmusiclist]() {
+
+                                       Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
+                                   
+                                        });
+
+
+                                    tikMusicThread.detach();
+                                  
                                 }
                                 else if (x->x == 331 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_F]) {
                                     if (x->type == 0) x->check = false;
@@ -564,6 +619,16 @@ int main(int argc, char* args[]) {
                                         y->isbeinghold = true;
                                     }
                                     demsleep = 0;
+
+                                    thread tikMusicThread([&tikmusiclist]() {
+
+                                        Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
+
+                                        });
+
+
+                                    tikMusicThread.detach();
+                                   
                                 }
                                 else if (x->x == 605 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_J]) {
                                     if (x->type == 0) x->check = false;
@@ -581,6 +646,13 @@ int main(int argc, char* args[]) {
                                         y->isbeinghold = true;
                                     }
                                     demsleep = 0;
+                                    thread tikMusicThread([&tikmusiclist]() {
+
+                                        Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
+
+                                        });
+
+                                    tikMusicThread.detach();
                                 }
                                 else if (x->x == 751 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_K]) {
                                     if (x->type == 0) x->check = false;
@@ -598,6 +670,13 @@ int main(int argc, char* args[]) {
                                         y->isbeinghold = true;
                                     }
                                     demsleep = 0;
+                                    thread tikMusicThread([&tikmusiclist]() {
+
+                                        Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
+
+                                        });
+
+                                    tikMusicThread.detach();
                                 }
                                 else if (x->x == 876 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_L]) {
                                     if (x->type == 0) x->check = false;
@@ -613,6 +692,13 @@ int main(int argc, char* args[]) {
                                         y->isbeinghold = true;
                                     }
                                     demsleep = 0;
+                                    thread tikMusicThread([&tikmusiclist]() {
+
+                                        Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
+
+                                        });
+
+                                    tikMusicThread.detach();
                                 }
                                 
                                 demkey=10;
@@ -952,6 +1038,11 @@ int main(int argc, char* args[]) {
                                 SDL_DestroyTexture(missTexture);
                                 SDL_DestroyTexture(perfectTexture);
                                 SDL_DestroyTexture(tooearlyTexture);
+                                SDL_DestroyTexture(darkbackgroundTexture);
+                                SDL_DestroyTexture(redbackgroundTexture);
+                                SDL_DestroyTexture(darkredbackgroundTexture);
+                                //giải phóng tất cả music
+
 								break;
 							}
                            
@@ -973,6 +1064,11 @@ int main(int argc, char* args[]) {
         }
         //close music
         Mix_FreeMusic(music);
+      
+        Mix_FreeChunk(tikmusiclist[0]);
+        Mix_FreeChunk(tikmusiclist[1]);
+        Mix_FreeChunk(tikmusiclist[2]);
+        //endgame
        
     }
 
