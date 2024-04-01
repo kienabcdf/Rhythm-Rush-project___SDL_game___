@@ -312,6 +312,28 @@ int main(int argc, char* args[]) {
                 printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
                 return 1;
             }
+            SDL_Surface*darkbackgroundSurface = IMG_Load("Image/gameplaydark.png");
+            if (darkbackgroundSurface == NULL) {
+				printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
+				return 1;
+			}
+            SDL_Surface* redbackgroundSurface = IMG_Load("Image/gameplayred.png");
+            if (redbackgroundSurface == NULL) {
+				printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
+				return 1;
+			}
+            SDL_Surface* darkredbackgroundSurface = IMG_Load("Image/gameplayreddark.png");
+            if (darkredbackgroundSurface == NULL) {
+                printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
+                return 1;
+            }
+            SDL_Texture* darkredbackgroundTexture = SDL_CreateTextureFromSurface(renderer, darkredbackgroundSurface);
+            SDL_FreeSurface(darkredbackgroundSurface);
+            SDL_Texture* redbackgroundTexture = SDL_CreateTextureFromSurface(renderer, redbackgroundSurface);
+            SDL_FreeSurface(redbackgroundSurface);
+
+            SDL_Texture* darkbackgroundTexture = SDL_CreateTextureFromSurface(renderer, darkbackgroundSurface);
+            SDL_FreeSurface(darkbackgroundSurface);
             SDL_Texture* backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
             SDL_FreeSurface(backgroundSurface);
             texture = backgroundTexture;
@@ -345,18 +367,32 @@ int main(int argc, char* args[]) {
             int tooearly = 0;
             int waitlongnood = 0;
             speed = 6;
+            int demlight = 0;
             maxWave = 125;
             //gameplay loop
             while (gameplay) {
                 // check time after each loop
                 time_t currentTime = std::time(nullptr);
                 time_t elapsedTime = currentTime - startTime;
+                if (elapsedTime == 211) {
+                    texture = redbackgroundTexture;
+                    backgroundTexture = redbackgroundTexture;
+                    darkbackgroundTexture = darkredbackgroundTexture;
+                }
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
                         quit = true;
                     }
                 }
+                if (demlight >= 50) {
+					demlight = 0;
+					if (texture == backgroundTexture) texture = darkbackgroundTexture;
+					else texture = backgroundTexture;
+				}
+                demlight++;
                 destinationRect = { 0,0, 1080, 810 };
+                Uint8 brightness = 200 * (sin(SDL_GetTicks() / 500.0) + 1) / 2+50; // Tạo hiệu ứng nhấp nháy
+                SDL_SetTextureColorMod(texture, brightness, brightness, brightness);
                 SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
                 demSpeed += 1;
                 //control speed, create wave nood
@@ -384,7 +420,10 @@ int main(int argc, char* args[]) {
                                 renderLongnood(renderer, longnoodTexture, y->length, y->x + 30, y->y);
                             }
                             else {
-                               
+                                Uint8 r = 127 * (sin(SDL_GetTicks() / 1000.0) + 1); // Tạo hiệu ứng thay đổi màu sắc
+                                Uint8 g = 127 * (sin(SDL_GetTicks() / 500.0) + 1); // Tạo hiệu ứng thay đổi màu sắc
+                                Uint8 b = 127 * (sin(SDL_GetTicks() / 2000.0) + 1); // Tạo hiệu ứng thay đổi màu sắc
+                                SDL_SetTextureColorMod(x->a, r, g, b);
                                 SDL_RenderCopyEx(renderer, x->a, NULL, &noodrect, 0.0, NULL, SDL_FLIP_NONE);
                             }
                         }
@@ -748,7 +787,7 @@ int main(int argc, char* args[]) {
              
                 SDL_Delay(12);
                //check to end game
-                if (((size(noods) == 0 || noods.back()->check == false) && elapsedTime >= 271)||demsleep>=20) {
+                if (((size(noods) == 0 || noods.back()->check == false) && elapsedTime >= 272)||demsleep>=20) {
                     Mix_HaltMusic();
                     //end music
                     Mix_Music* end = Mix_LoadMUS("music/end.mp3");
