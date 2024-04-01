@@ -1,1 +1,20 @@
-﻿  Project2.vcxproj -> C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\x64\Debug\Project2.exe
+﻿  Source.cpp
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(20,13): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(75,51): warning C4838: conversion from 'double' to 'int' requires a narrowing conversion
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(75,51): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(78,35): warning C4838: conversion from 'double' to 'int' requires a narrowing conversion
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(78,35): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(78,75): warning C4838: conversion from 'double' to 'int' requires a narrowing conversion
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(78,75): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(122,31): warning C4838: conversion from 'double' to 'int' requires a narrowing conversion
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(122,31): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(225,44): warning C4838: conversion from 'double' to 'int' requires a narrowing conversion
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(225,44): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(394,34): warning C4244: 'initializing': conversion from 'double' to 'Uint8', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(423,41): warning C4244: 'initializing': conversion from 'double' to 'Uint8', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(424,41): warning C4244: 'initializing': conversion from 'double' to 'Uint8', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(425,41): warning C4244: 'initializing': conversion from 'double' to 'Uint8', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(456,78): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(473,44): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\Project2\Source.cpp(816,41): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  Project2.vcxproj -> C:\Users\ttk08\OneDrive\Documents\GitHub\project\Project2\x64\Debug\Project2.exe

@@ -30,7 +30,6 @@ vector<int> generateRandomNumbers(int min, int max, int n) {
 	}
 	return result;
 }
-
 const int positionnood[] = { 59,205,331,605,751,876 };//position of nood
 const int numbernood[]={1,1,1,1,1,1,2,2,2,2,2,3,3,1,3,4,1,4,6,2};//rate of random number of nood
 //funtion to random number of nood
@@ -64,9 +63,24 @@ struct Noods {
     SDL_Texture* a;
     int x=0, y=0;
     bool check = false;
+    int type = 0;
 };
-  
-
+struct Longnoods:Noods {
+    int length;
+    bool isbeinghold;
+    int type = 1;
+};
+void renderLongnood(SDL_Renderer* renderer, SDL_Texture* longnoodTexture, int customLength, int posX, int posY) {
+    // Tạo SDL_Rect cho phần đầu của longnood
+    SDL_Rect headRect = { 0, 0, 88, customLength/2*4.5 };
+    SDL_Rect destHeadRect = { posX, posY, 44, customLength/2 };
+    // Tạo SDL_Rect cho phần cuối của longnood
+    SDL_Rect tailRect = { 0, 3532 - customLength/2*4.5, 88, customLength/2*4.5 };
+    SDL_Rect destTailRect = { posX, posY + customLength/2, 44, customLength/2 };
+    // Vẽ phần đầu, thân và cuối của longnood
+    SDL_RenderCopyEx(renderer, longnoodTexture, &headRect, &destHeadRect, 0.0, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(renderer, longnoodTexture, &tailRect, &destTailRect, 0.0, NULL, SDL_FLIP_NONE);
+}
 int main(int argc, char* args[]) {
     bool gameplay = false;
 
@@ -88,15 +102,31 @@ int main(int argc, char* args[]) {
         printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
         return 1;
     }
-    SDL_Surface* mouse = IMG_Load("Image/nood.png");
-    if (mouse == NULL) {
+    SDL_Surface* noodSurface = IMG_Load("Image/nood.png");
+    if (noodSurface == NULL) {
         printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
         return 1;
     }
-    SDL_Texture* mouseTexture = SDL_CreateTextureFromSurface(renderer, mouse);
-    SDL_FreeSurface(mouse);
-    SDL_Rect mouseRect = { 100,1.1, 100, 100 };
+    SDL_Surface* longnoodSurface = IMG_Load("Image/longnood.png");
+    if (longnoodSurface == NULL) {
+		printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
+		return 1;
+	}
+    SDL_Surface* longnood_holdSurface = IMG_Load("Image/longnood_hold.png");
+    if (longnood_holdSurface == NULL) {
+        printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
+        return 1;
+    }
+    SDL_Texture* noodTexture = SDL_CreateTextureFromSurface(renderer, noodSurface);
+    SDL_FreeSurface(noodSurface);
+    SDL_Rect noodRect = { 100,1.1, 100, 100 };
+    SDL_Texture* longnoodTexture = SDL_CreateTextureFromSurface(renderer, longnoodSurface);
+    SDL_FreeSurface(longnoodSurface);
+    SDL_Texture* longnood_holdTexture = SDL_CreateTextureFromSurface(renderer, longnood_holdSurface);
+    SDL_FreeSurface(longnood_holdSurface);
     
+    //create longnoodreact with full image of longnood
+    SDL_Rect longnoodRect = { 205,50, 22, 200};
 
     SDL_Surface* openSurface = IMG_Load("Image/open.png");
     SDL_Texture* openTexture = SDL_CreateTextureFromSurface(renderer, openSurface);
@@ -110,13 +140,18 @@ int main(int argc, char* args[]) {
     
     
     Noods nood;
-    nood.a = mouseTexture;
+    nood.a = noodTexture;
     nood.x = 59;
     nood.y = 0;
     nood.check = true;
     //creat vector nood for gameplay
-    vector<Noods> noods;
-    noods.push_back(nood);
+    vector<Noods*> noods;
+    
+    Longnoods longnood;
+    longnood.a = longnoodTexture;
+    longnood.x = 205;
+    longnood.y = 0;
+    longnood.check = true;
     SDL_RenderPresent(renderer);
 
     //loop of opentexture go to game if mouse click
@@ -132,11 +167,13 @@ int main(int argc, char* args[]) {
     bool quit = false;
     SDL_Event e;
     // variable to control speed and number of nood
+    int demsleep = 0;
     float demSpeed = 0;
     float demWave = 0;
     int demNood = 0;
-    int speed = 14;
+    int speed = 6;
     int demsp = 0;
+    int maxWave = 125;
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return 1;
@@ -275,6 +312,28 @@ int main(int argc, char* args[]) {
                 printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
                 return 1;
             }
+            SDL_Surface*darkbackgroundSurface = IMG_Load("Image/gameplaydark.png");
+            if (darkbackgroundSurface == NULL) {
+				printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
+				return 1;
+			}
+            SDL_Surface* redbackgroundSurface = IMG_Load("Image/gameplayred.png");
+            if (redbackgroundSurface == NULL) {
+				printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
+				return 1;
+			}
+            SDL_Surface* darkredbackgroundSurface = IMG_Load("Image/gameplayreddark.png");
+            if (darkredbackgroundSurface == NULL) {
+                printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
+                return 1;
+            }
+            SDL_Texture* darkredbackgroundTexture = SDL_CreateTextureFromSurface(renderer, darkredbackgroundSurface);
+            SDL_FreeSurface(darkredbackgroundSurface);
+            SDL_Texture* redbackgroundTexture = SDL_CreateTextureFromSurface(renderer, redbackgroundSurface);
+            SDL_FreeSurface(redbackgroundSurface);
+
+            SDL_Texture* darkbackgroundTexture = SDL_CreateTextureFromSurface(renderer, darkbackgroundSurface);
+            SDL_FreeSurface(darkbackgroundSurface);
             SDL_Texture* backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
             SDL_FreeSurface(backgroundSurface);
             texture = backgroundTexture;
@@ -298,6 +357,7 @@ int main(int argc, char* args[]) {
             t1.join();
             //variable for gameplay
             time_t startTime = std::time(nullptr);
+        
             int demkey = 0;
             int demperfect = 0;
             int choice;
@@ -305,138 +365,357 @@ int main(int argc, char* args[]) {
             int good = 0;
             int miss = 0;
             int tooearly = 0;
-            speed = 14;
+            int waitlongnood = 0;
+            speed = 6;
+            int demlight = 0;
+            maxWave = 125;
             //gameplay loop
             while (gameplay) {
                 // check time after each loop
                 time_t currentTime = std::time(nullptr);
                 time_t elapsedTime = currentTime - startTime;
+                if (elapsedTime == 211) {
+                    texture = redbackgroundTexture;
+                    backgroundTexture = redbackgroundTexture;
+                    darkbackgroundTexture = darkredbackgroundTexture;
+                }
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
                         quit = true;
                     }
                 }
+                if (demlight >= 50) {
+					demlight = 0;
+					if (texture == backgroundTexture) texture = darkbackgroundTexture;
+					else texture = backgroundTexture;
+				}
+                demlight++;
                 destinationRect = { 0,0, 1080, 810 };
+                Uint8 brightness = 200 * (sin(SDL_GetTicks() / 500.0) + 1) / 2+50; // Tạo hiệu ứng nhấp nháy
+                SDL_SetTextureColorMod(texture, brightness, brightness, brightness);
                 SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
                 demSpeed += 1;
                 //control speed, create wave nood
                 if (demSpeed >= 1) {
                     demSpeed = 0;
-                    for (Noods& x : noods) {
-                        if (x.check == true) {
-                            if (x.y >= 810) {
-                                x.check = false;
+                    for (Noods*& x : noods) {
+                        if (x->check == true) {
+                            if (x->y >= 810&&x->type==0) {
+                                x->check = false;
                                 choice = 0;
-                                demperfect = 20;
+                                demperfect = 10;
                                 miss++;
+                                demsleep++;
                             }
-                            x.y += 5;//move nood
-                            SDL_Rect mouseRect = { x.x,x.y, 100, 100 };
-                            SDL_RenderCopyEx(renderer, x.a, NULL, &mouseRect, 0.0, NULL, SDL_FLIP_NONE);
+                            x->y += speed;//move nood and control speed
+                            SDL_Rect noodrect = { x->x,x->y, 100, 100 };
+                            //check type of nood to render
+                            if (x->type == 1) {
+                                //ép kiểu sang longnood để vẽ
+                                Longnoods* y = (Longnoods*)x;
+                                if (y->isbeinghold == true) {
+                                    renderLongnood(renderer, longnood_holdTexture, y->length, y->x + 30, y->y);
+								}
+								else
+                                renderLongnood(renderer, longnoodTexture, y->length, y->x + 30, y->y);
+                            }
+                            else {
+                                Uint8 r = 127 * (sin(SDL_GetTicks() / 1000.0) + 1); // Tạo hiệu ứng thay đổi màu sắc
+                                Uint8 g = 127 * (sin(SDL_GetTicks() / 500.0) + 1); // Tạo hiệu ứng thay đổi màu sắc
+                                Uint8 b = 127 * (sin(SDL_GetTicks() / 2000.0) + 1); // Tạo hiệu ứng thay đổi màu sắc
+                                SDL_SetTextureColorMod(x->a, r, g, b);
+                                SDL_RenderCopyEx(renderer, x->a, NULL, &noodrect, 0.0, NULL, SDL_FLIP_NONE);
+                            }
                         }
-                      
-                      
+
+
                     }
-                    demWave +=2;
+                    demWave += 2;
                     // wave of nood
-                    if (demWave >= 125) {
+                    if (demWave >= maxWave && waitlongnood <= 0) {
                         demWave = 0;
                         //create new wave nood
                         vector<int> position = creatpositionofnood(creatnumberofnood());
-                        
                         if (elapsedTime <= 268 && !(elapsedTime >= 206 && elapsedTime <= 210)) {
-                            for (int y : position) {
+                            int type = generateRandomNumber(1, 10);
+                            if (elapsedTime < 1|| type>3) {
+                                for (int i = 0; i < position.size(); i++) {
+                                    Noods* nood = new Noods;
+                                    nood->a = noodTexture;
+                                    nood->x = positionnood[position[i] - 1];
+                                    nood->y = 0;
+                                    nood->check = true;
+                                    noods.push_back(nood);
+                                }
+                            }
+                            else {
+                                int length = generateRandomNumber(250, 500);
+                                int ranDom = 0;
+                                if (position.size() >= 4) {
+                                    while (true) {
+                                        ranDom = generateRandomNumber(0, size(position));
+                                        if (ranDom == 0 || ranDom == size(position) / 2) break;
+                                    }
 
-                                noods.push_back(nood);
-                                noods.back().x = positionnood[y - 1];
+                            }
+                                for (int i = 0; i < position.size()-ranDom; i++) {
+                                    Longnoods* longnood = new Longnoods;
+                                    longnood->a = longnoodTexture;
+                                    longnood->x = positionnood[position[i] - 1];
+                                    longnood->y = 0 - length;
+                                    longnood->check = true;
+                                    longnood->length = length;
+                                    longnood->isbeinghold = false;
+                                    noods.push_back(longnood);
+                                    noods.back()->type = 1;
 
+                                }
+                                for (int i = position.size() - ranDom; i < position.size(); i++) {
+									Noods* nood = new Noods;
+									nood->a = noodTexture;
+									nood->x = positionnood[position[i] - 1];
+									nood->y = 0-length/2;
+									nood->check = true;
+                                    nood->type = 0;
+									noods.push_back(nood);
+								}
+                                waitlongnood = length / speed * 2 + maxWave;
                             }
                         }
                         // increase speecd of nood follow time
                         demsp++;
-                        if (demsp >= 15) {
-                            if (speed > 7) {
-                                speed -= 1;
+                        if (demsp >= 23) {
+                            
+                            if (maxWave > 60&&(demsp==23||demsp==40)) maxWave -= 5;
+                            if (speed < 12&&demsp>=40) {
+                                speed += 1;
+                                demsp = 0;
                             }
-                            demsp = 0;
+                          
                         }
                     }
+                    else if (waitlongnood > 0) waitlongnood -= 3;
                 }
-                if (noods.size() > 50) noods.erase(noods.begin(), noods.begin() + 30);
-                if (demkey == 0) {//demkey to reduce stick key
-                    //main gameplay get point and check correct nood be pressed
-                    for (Noods& x : noods) {
-                        if (x.check == true && x.y >= 525 && x.y <= 800) {
-                            if (x.x == 59 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_S]) {
-                                x.check = false;
-                                if (x.y >= 525 && x.y < 575) { choice = 1; demperfect = 20; tooearly++; }
-                                else if ((x.y >= 575 && x.y < 630) || (x.y >= 740 && x.y < 800)) { choice = 2; demperfect = 20; good++; }
-                                else if (x.y >= 630 && x.y < 740) { choice = 3; demperfect = 20; perfect++; }
-                                demkey = 10;
-                            }
-                            else if (x.x == 205 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_D]) {
-                                x.check = false;
-                                
-                                if (x.y >= 525 && x.y < 575) { choice = 1; demperfect = 20; tooearly++; }
-                                else if ((x.y >= 575 && x.y < 630) || (x.y >= 740 && x.y < 800)) { choice = 2; demperfect = 20; good++; }
-                                else if (x.y >= 630 && x.y < 740) { choice = 3; demperfect = 20; perfect++; }
-                               
-                                demkey = 10;
-                            }
-                            else if (x.x == 331 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_F]) {
-                                x.check = false;
-                               
-                                if (x.y >= 525 && x.y < 575) { choice = 1; demperfect = 20; tooearly++; }
-                                else if ((x.y >= 575 && x.y < 630) || (x.y >= 740 && x.y < 800)) { choice = 2; demperfect = 20;good++; }
-                                else if (x.y >= 630 && x.y < 740) { choice = 3; demperfect = 20; perfect++; }
-                                
-                                    demkey = 10;
-                            }
-                            else if (x.x == 605 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_J]) {
-                                x.check = false;
-                                
-                                if (x.y >= 525 && x.y < 575) { choice = 1; demperfect = 20; tooearly++; }
-                                else if ((x.y >= 575 && x.y < 630) || (x.y >= 740 && x.y < 800)) { choice = 2; demperfect = 20; good++; }
-                                else if (x.y >= 630 && x.y < 740) { choice = 3; demperfect = 20; perfect++; }
-								
-									
-                                
-                                demkey = 10;
-                            }
-                            else if (x.x == 751 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_K]) {
-                                x.check = false;
-
-                                if (x.y >= 525 && x.y < 575) { choice = 1; demperfect = 20; tooearly++; }
-                                else if ((x.y >= 575 && x.y < 630) || (x.y >= 740 && x.y < 800)) { choice = 2; demperfect = 20; good++; }
-                                else if (x.y >= 630 && x.y < 740) { choice = 3; demperfect = 20; perfect++; }
-								
-								
-                             
-                                demkey = 10;
-                            }
-                            else if (x.x == 876 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_L]) {
-                                x.check = false;
-                               
-                                if (x.y >= 525 && x.y < 575) { choice = 1; demperfect = 20; tooearly++; }
-                                else if ((x.y >= 575 && x.y < 630) || (x.y >= 740 && x.y < 800)) { choice = 2; demperfect = 20; good++; }
-                                else if (x.y >= 630 && x.y < 740) { choice = 3; demperfect = 20; perfect++; }
-                               
-                                demkey = 10;
-                            }
-                            else continue;
-                        }
-                        else if (x.check == true && x.y < 575) { break; }
+                if (noods.size() > 50) {
+                    //giải phóng bộ nhớ và xóa 30 phần tử đầu
+                    for (int i = 0; i < 30; i++) {
+                        delete noods[i];
                     }
+                    noods.erase(noods.begin(), noods.begin() + 30);
+                }
+                //demkey to reduce stick key
+                    //main gameplay get point and check correct nood be pressed
+                if (demkey <= 0) {
+                    for (Noods*& x : noods) {
+                        bool check = true;
+                        if (x->type == 1) {
+
+                            Longnoods* y = (Longnoods*)x;
+                            if (y->isbeinghold == true || (y->isbeinghold == false && (y->y + y->length > 800))) check = false;
+
+                        }
+                        if (check) {
+                            if (x->type == 1) {
+                                Longnoods* y = (Longnoods*)x;
+                                y->y += y->length;
+                            }
+                            if (x->check == true && x->y >= 525 && x->y <= 800) {
+                                if (x->x == 59 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_S]) {
+
+
+                                    if (x->type == 0) x->check = false;
+                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+
+                                    if (x->type == 1) {
+                                        Longnoods* y = (Longnoods*)x;
+                                        y->isbeinghold = true;
+
+                                    }
+                                    demsleep = 0;
+                                }
+                                else if (x->x == 205 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_D]) {
+                                    if (x->type == 0) x->check = false;
+
+                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+
+
+                                    if (x->type == 1) {
+                                        Longnoods* y = (Longnoods*)x;
+
+                                        y->isbeinghold = true;
+                                    }
+                                    demsleep = 0;
+                                }
+                                else if (x->x == 331 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_F]) {
+                                    if (x->type == 0) x->check = false;
+
+                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+
+
+                                    if (x->type == 1) {
+                                        Longnoods* y = (Longnoods*)x;
+
+                                        y->isbeinghold = true;
+                                    }
+                                    demsleep = 0;
+                                }
+                                else if (x->x == 605 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_J]) {
+                                    if (x->type == 0) x->check = false;
+
+                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+
+
+
+
+                                    if (x->type == 1) {
+                                        Longnoods* y = (Longnoods*)x;
+
+                                        y->isbeinghold = true;
+                                    }
+                                    demsleep = 0;
+                                }
+                                else if (x->x == 751 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_K]) {
+                                    if (x->type == 0) x->check = false;
+
+                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+
+
+
+
+                                    if (x->type == 1) {
+                                        Longnoods* y = (Longnoods*)x;
+
+                                        y->isbeinghold = true;
+                                    }
+                                    demsleep = 0;
+                                }
+                                else if (x->x == 876 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_L]) {
+                                    if (x->type == 0) x->check = false;
+
+                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+
+
+                                    if (x->type == 1) {
+                                        Longnoods* y = (Longnoods*)x;
+
+                                        y->isbeinghold = true;
+                                    }
+                                    demsleep = 0;
+                                }
+                                
+                                demkey=10;
+
+                            }
+                            else if (x->check == true && x->y < 575) {
+                                if (x->type == 1) {
+                                    Longnoods* y = (Longnoods*)x;
+                                    y->y -= y->length;
+
+                                }
+                                break;
+
+                            }
+                            if (x->type == 1) {
+                                Longnoods* y = (Longnoods*)x;
+                                y->y -= y->length;
+
+                            }
+                        }
+                        else if(!check&&x->check==true){
+                            if (x->y > 800) { x->check = false; continue; }
+                            
+                            Longnoods* y = (Longnoods*)x;
+                            if (y->isbeinghold == false && (y->y + y->length > 800)&&(y->y<750)) {
+                                miss++; choice = 0; demperfect = 5;
+                                demsleep++;
+                            }
+                            else if (y->isbeinghold == true) {
+                                if (y->y <= 800) {
+                                    if (y->x == 59 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_S]) {
+                                        
+                                       
+                                        perfect++;
+                                        choice = 3;
+                                        
+                                        demsleep = 0;
+                                      
+                                    }
+                                    else if (y->x == 205 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_D]) {
+                                        
+                                        perfect++;
+                                        choice = 3;
+                                        
+                                        demsleep = 0;
+                                    }
+                                    else if (y->x == 331 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_F]) {
+                                        
+                                        perfect++;
+                                        choice = 3;
+                                        
+                                        demsleep = 0;
+                                    }
+                                    else if (y->x == 605 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_J]) {
+                                        
+                                        perfect++;
+                                        
+                                        choice = 3;
+                                        demsleep = 0;
+                                    }
+                                    else if (y->x == 751 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_K]) {
+                                        
+                                        perfect++;
+                                        choice=3;
+                                        
+                                        demsleep = 0;
+                                    }
+                                    else if (y->x == 876 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_L]) {
+                                       
+                                        perfect++;
+                                        choice = 3;
+                                        
+                                        demsleep = 0;
+                                    }
+                                    else {
+                                        if (y->y >= 680) { y->check = false; perfect++;
+                                        choice = 3;
+
+                                        demsleep = 0;
+										}
+                                        else { miss++; y->isbeinghold = false; choice = 0; demsleep++; } }
+
+                                    demperfect = 5;
+                                }
+                                else {
+                                    y->check = false;
+
+                                }
+                            }
+                            demkey = 15;
+                        }
+                    }
+
                 }
                 else demkey--;
-                //pause game if esc press
-                if (demkey == 0) {
+               
+              
                     if (SDL_GetKeyboardState(NULL)[SDL_SCANCODE_ESCAPE]) {
                         Mix_PauseMusic();
                         SDL_Surface* pauseSurface = IMG_Load("Image/pause.png");
                         SDL_Texture* pauseTexture = SDL_CreateTextureFromSurface(renderer, pauseSurface);
                         SDL_FreeSurface(pauseSurface);
-                        destinationRect = {230,200, 600, 450};
+                        destinationRect = { 230,200, 600, 450 };
                         SDL_RenderCopyEx(renderer, pauseTexture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
                         SDL_RenderPresent(renderer);
                         while (true) {
@@ -464,23 +743,32 @@ int main(int argc, char* args[]) {
                                     miss = 0;
                                     tooearly = 0;
                                     startTime = std::time(nullptr);
+                                    demkey = 0;
+                                    demperfect = 0;
+                                    demsleep = 0;
+                                    demSpeed = 0;
+                                    demWave = 0;
+                                    demNood = 0;
+                                    speed = 6;
+                                    demsp = 0;
+                                    maxWave = 125;
                                     break;
                                 }
-                                else if (y > 510 && y < 580&&x>610&&x<730) {
-									gameplay = false;
+                                else if (y > 510 && y < 580 && x>610 && x < 730) {
+                                    gameplay = false;
                                     noods.resize(0);
                                     break;
-								}
-							}
+                                }
+                            }
                         }
                         SDL_DestroyTexture(pauseTexture);
-                        demkey = 10;
+                     
                     }
-
-                }
-                else demkey--;
+                
+                
+              
                 //code for display result of nood be pressed
-                if (demperfect > 0) {
+                if (demperfect >= 0) {
                     demperfect--;
                     //thread to display result
                     thread t2([&renderer, perfectTexture,goodTexture,missTexture,tooearlyTexture,choice]() {
@@ -496,10 +784,10 @@ int main(int argc, char* args[]) {
                 }
                 //renderer gameplay
                 SDL_RenderPresent(renderer);
-              //control fps by and speed by variable speed
-                SDL_Delay(speed);
+             
+                SDL_Delay(12);
                //check to end game
-                if ((size(noods) == 0 || noods.back().check == false) && elapsedTime >= 271) {
+                if (((size(noods) == 0 || noods.back()->check == false) && elapsedTime >= 272)||demsleep>=20) {
                     Mix_HaltMusic();
                     //end music
                     Mix_Music* end = Mix_LoadMUS("music/end.mp3");
@@ -545,59 +833,70 @@ int main(int argc, char* args[]) {
 						SDL_RenderCopyEx(renderer, complete0Texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
 					}
                    //use ttf to write completed art
-                   thread t3([&renderer, point, perfect, good, miss, tooearly]() {
+                   thread t3([&renderer, point, perfect, good, miss, tooearly,demsleep]() {
                    TTF_Init();
                    TTF_Font* font = TTF_OpenFont("Front/font.ttf", 24);
                    SDL_Color color = { 255, 255, 0 };
                    SDL_Surface* surface;
                    SDL_Texture* texture;
                    SDL_Rect textRect;
-                   if (miss + tooearly == 0 && good == 0) {
-                       surface = TTF_RenderText_Solid(font, "So Amazing, You are perfect", color);
+                   if (demsleep >= 20) {
+                       //write "Are you sleeping?"
+                       
+                       surface = TTF_RenderText_Solid(font, "Are you sleeping?", color);
                        texture = SDL_CreateTextureFromSurface(renderer, surface);
-                       textRect = { 210,350, surface->w, surface->h };
+                       textRect = { 350,350, surface->w, 150};
                        SDL_RenderCopy(renderer, texture, NULL, &textRect);
-                   }
-                   else if (miss + tooearly<0.05*(perfect+good+miss+tooearly) && good > 0 && good<0.2 * perfect) {
-                       surface = TTF_RenderText_Solid(font, "Great,you're almost perfect", color);
-                       texture = SDL_CreateTextureFromSurface(renderer, surface);
-                       textRect = { 220,350, surface->w, surface->h };
-                       SDL_RenderCopy(renderer, texture, NULL, &textRect);
-                   }
-                   else if ((good + perfect*2) > 0.8* (miss + tooearly + good + perfect)*2) {
-                       surface = TTF_RenderText_Solid(font, "Good", color);
-                       texture = SDL_CreateTextureFromSurface(renderer, surface);
-                       textRect = { 450,350, surface->w, surface->h };
-                       SDL_RenderCopy(renderer, texture, NULL, &textRect);
-                   }
-                   else if ( (good + perfect*2)> 0.6* (miss + tooearly + good + perfect)*2) {
-                       surface = TTF_RenderText_Solid(font, "Not bad but you can better", color);
-                       texture = SDL_CreateTextureFromSurface(renderer, surface);
-                       textRect = { 240,350, surface->w, surface->h };
-                       SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                       
                    }
                    else {
-                       surface = TTF_RenderText_Solid(font, "You need to practice more", color);
+                       if (miss + tooearly == 0 && good == 0) {
+                           surface = TTF_RenderText_Solid(font, "So Amazing, You are perfect", color);
+                           texture = SDL_CreateTextureFromSurface(renderer, surface);
+                           textRect = { 210,350, surface->w, surface->h };
+                           SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                       }
+                       else if (miss + tooearly < 0.05 * (perfect + good + miss + tooearly) && good > 0 && good < 0.25 * perfect) {
+                           surface = TTF_RenderText_Solid(font, "Great,you're almost perfect", color);
+                           texture = SDL_CreateTextureFromSurface(renderer, surface);
+                           textRect = { 220,350, surface->w, surface->h };
+                           SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                       }
+                       else if ((good + perfect * 2) > 0.8 * (miss + tooearly + good + perfect) * 2) {
+                           surface = TTF_RenderText_Solid(font, "Good", color);
+                           texture = SDL_CreateTextureFromSurface(renderer, surface);
+                           textRect = { 475,350, surface->w, surface->h };
+                           SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                       }
+                       else if ((good + perfect * 2) > 0.6 * (miss + tooearly + good + perfect) * 2) {
+                           surface = TTF_RenderText_Solid(font, "Not bad but you can better", color);
+                           texture = SDL_CreateTextureFromSurface(renderer, surface);
+                           textRect = { 240,350, surface->w, surface->h };
+                           SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                       }
+                       else {
+                           surface = TTF_RenderText_Solid(font, "You need to practice more", color);
+                           texture = SDL_CreateTextureFromSurface(renderer, surface);
+                           textRect = { 230,350, surface->w, surface->h };
+                           SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                       }
+                       surface = TTF_RenderText_Solid(font, ("Your point is: " + to_string(point)).c_str(), color);
                        texture = SDL_CreateTextureFromSurface(renderer, surface);
-                       textRect = { 230,350, surface->w, surface->h };
+                       textRect = { 325,400, surface->w, surface->h };
+                       SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                       surface = TTF_RenderText_Solid(font, ("Perfect: " + to_string(perfect)).c_str(), color);
+                       texture = SDL_CreateTextureFromSurface(renderer, surface);
+                       textRect = { 325,450, surface->w, surface->h };
+                       SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                       surface = TTF_RenderText_Solid(font, ("Good: " + to_string(good)).c_str(), color);
+                       texture = SDL_CreateTextureFromSurface(renderer, surface);
+                       textRect = { 325,500, surface->w, surface->h };
+                       SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                       surface = TTF_RenderText_Solid(font, ("Error: " + to_string(miss + tooearly)).c_str(), color);
+                       texture = SDL_CreateTextureFromSurface(renderer, surface);
+                       textRect = { 325,550, surface->w, surface->h };
                        SDL_RenderCopy(renderer, texture, NULL, &textRect);
                    }
-                    surface = TTF_RenderText_Solid(font, ("Your point is: " + to_string(point)).c_str(), color);
-                    texture = SDL_CreateTextureFromSurface(renderer, surface);
-                    textRect = { 325,400, surface->w, surface->h };
-                   SDL_RenderCopy(renderer, texture, NULL, &textRect);
-                   surface = TTF_RenderText_Solid(font, ("Perfect: " + to_string(perfect)).c_str(), color);
-                   texture = SDL_CreateTextureFromSurface(renderer, surface);
-                   textRect = { 325,450, surface->w, surface->h };
-                   SDL_RenderCopy(renderer, texture, NULL, &textRect);
-                   surface = TTF_RenderText_Solid(font, ("Good: " + to_string(good)).c_str(), color);
-                   texture = SDL_CreateTextureFromSurface(renderer, surface);
-                   textRect = { 325,500, surface->w, surface->h };
-                   SDL_RenderCopy(renderer, texture, NULL, &textRect);  
-                   surface = TTF_RenderText_Solid(font, ("Error: " + to_string(miss+tooearly)).c_str(), color);
-                   texture = SDL_CreateTextureFromSurface(renderer, surface);
-                    textRect = { 325,550, surface->w, surface->h };
-                    SDL_RenderCopy(renderer, texture, NULL, &textRect);
 					SDL_DestroyTexture(texture);
 					SDL_FreeSurface(surface);
 					TTF_CloseFont(font);
@@ -627,6 +926,9 @@ int main(int argc, char* args[]) {
                                 good = 0;
                                 miss = 0;
                                 tooearly = 0;
+                                demsleep = 0;
+                                speed= 6;
+                                maxWave = 125;
                                 break;
 							}
                             //quit button
@@ -641,6 +943,10 @@ int main(int argc, char* args[]) {
 								good = 0;
 								miss = 0;
 								tooearly = 0;
+                                demsleep = 0;
+                                speed = 6;
+                                maxWave = 125;
+
                                 SDL_DestroyTexture(backgroundTexture);
                                 SDL_DestroyTexture(goodTexture);
                                 SDL_DestroyTexture(missTexture);
@@ -659,7 +965,8 @@ int main(int argc, char* args[]) {
                     
                 }
                 //check time
-                cout << elapsedTime<< endl;
+                cout << elapsedTime<<" ";
+                cout<<speed<<" "<<maxWave<<endl;
                
             }
             startTime = std::time(nullptr);
@@ -673,6 +980,9 @@ int main(int argc, char* args[]) {
     // endgame
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    SDL_DestroyTexture(noodTexture);
+    SDL_DestroyTexture(longnoodTexture);
+    SDL_DestroyTexture(longnood_holdTexture);
     SDL_Quit();
     return 0;
 }
