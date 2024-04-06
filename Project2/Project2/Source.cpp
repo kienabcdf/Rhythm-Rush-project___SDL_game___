@@ -9,7 +9,7 @@
 #include<SDL_mixer.h>
 #include<SDL_ttf.h>
 #include<thread>
-
+#include<fstream>
 using namespace std;
 
 
@@ -84,6 +84,48 @@ void renderLongnood(SDL_Renderer* renderer, SDL_Texture* longnoodTexture, int cu
     SDL_RenderCopyEx(renderer, longnoodTexture, &headRect, &destHeadRect, 0.0, NULL, SDL_FLIP_NONE);
     SDL_RenderCopyEx(renderer, longnoodTexture, &tailRect, &destTailRect, 0.0, NULL, SDL_FLIP_NONE);
 }
+// hàm save game
+
+
+void saveGameState(const vector<Noods*>& noods, float demSpeed, float demWave, int demNood, int speed, int demsp, int maxWave, int demkey, int demperfect, int perfect, int good, int miss, int tooearly, int waitlongnood, int demlight, time_t startTime, time_t elapsedTime) {
+    ofstream file;
+    file.open("gameState.txt");
+
+    // Lưu các biến
+    file << demSpeed << endl;
+    file << demWave << endl;
+    file << demNood << endl;
+    file << speed << endl;
+    file << demsp << endl;
+    file << maxWave << endl;
+    file << demkey << endl;
+    file << demperfect << endl;
+    file << perfect << endl;
+    file << good << endl;
+    file << miss << endl;
+    file << tooearly << endl;
+    file << waitlongnood << endl;
+    file << demlight << endl;
+    file << startTime << endl;
+    file << elapsedTime << endl;
+
+    // Lưu vector noods
+    for ( Noods* nood : noods) {
+        file << nood->x << " " << nood->y << " " << nood->check << " " << nood->type;
+        if (nood->type == 1) {
+             Longnoods*longnood = (Longnoods*)nood;
+            file << longnood->length << " " << longnood->isbeinghold << endl;
+        }
+        else {
+			file << endl;
+		}
+    }
+
+    file.close();
+}
+// hàm load game
+
+
 int main(int argc, char* args[]) {
     bool gameplay = false;
 
@@ -194,6 +236,12 @@ int main(int argc, char* args[]) {
     }
     //main loop start menu 
     while (!quit) {
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT) {
+                quit = true;
+                gameplay = false;
+            }
+        }
         SDL_Surface* menuSurface = IMG_Load("Image/Menu.png");
         SDL_Texture* menuTexture = SDL_CreateTextureFromSurface(renderer, menuSurface);
         SDL_FreeSurface(menuSurface);
@@ -217,11 +265,13 @@ int main(int argc, char* args[]) {
             });
         t1.join();
         //menu loop
-        while (true) {
+        while (!quit) {
 
             while (SDL_PollEvent(&e) != 0) {
                 if (e.type == SDL_QUIT) {
                     quit = true;
+                    gameplay =false;
+                    break;
                 }
             }
 
@@ -376,13 +426,12 @@ int main(int argc, char* args[]) {
             SDL_FreeSurface(tooearlySurface);
             
             //thread to play gameplay music
-            t1 = std::thread([&music]() {
-                Mix_PlayMusic(music, -1);
-                });
-            t1.join();
+           
+           
             //variable for gameplay
             time_t startTime = std::time(nullptr);
-        
+            time_t currentTime;
+            time_t elapsedTime=0;
             int demkey = 0;
             int demperfect = 0;
             int choice;
@@ -394,24 +443,112 @@ int main(int argc, char* args[]) {
             speed = 6;
             int demlight = 0;
             maxWave = 125;
-            //gameplay loop
+            //load game nếu file save game tồn tại và không bị trống
+            ifstream file("gameState.txt");
+
+            // Kiểm tra xem file có tồn tại và không rỗng không
+            if (file.good() && file.peek() != std::ifstream::traits_type::eof()) {
+                // File tồn tại và không rỗng, tải game
+                
+
+                // Load các biến
+                file >> demSpeed;
+                file >> demWave;
+                file >> demNood;
+                file >> speed;
+                file >> demsp;
+                file >> maxWave;
+                file >> demkey;
+                file >> demperfect;
+                file >> perfect;
+                file >> good;
+                file >> miss;
+                file >> tooearly;
+                file >> waitlongnood;
+                file >> demlight;
+                file >> startTime;
+                file >> elapsedTime;
+
+                // Set lại startTime
+               
+
+                // Load vector noods
+                int x, y, type;
+                bool check;
+                while (file >> x >> y >> check >> type) {
+                  
+                  
+                    if (type == 1) {
+                        int length;
+                        bool isbeinghold;
+                        file >> length >> isbeinghold;
+                        Longnoods* longnood = new Longnoods;
+                        longnood->a = longnoodTexture;
+                        longnood->x = x;
+                        longnood->y = y;
+                        longnood->check = check;
+                        longnood->type = type;
+                        longnood->length = length;
+                        longnood->isbeinghold = isbeinghold;
+                        file >> longnood->length >> longnood->isbeinghold;
+                        noods.push_back(longnood);
+
+
+                    }
+                    else {
+                    Noods* nood = new Noods;
+                    nood->a = noodTexture;
+                    nood->x = x;
+                    nood->y = y;
+                    nood->check = check;
+                    nood->type = type;
+                    noods.push_back(nood);
+
+                    }
+                }
+
+                file.close();
+
+                // Xóa file sau khi đã tải xong
+                std::remove("gameState.txt");
+                if (elapsedTime >= 211) {
+                    texture = redbackgroundTexture;
+                }
+                // nghỉ 1s để chờ nhạc chạy
+                SDL_Delay(1000);
+            }
+            if (elapsedTime > 0) {
+                time_t currentTime = time(0);
+                startTime = currentTime - elapsedTime;
+            }
+            t1 = std::thread([&music,elapsedTime]() {
+                Mix_PlayMusic(music, -1);
+                if (elapsedTime > 0) {
+                    Mix_SetMusicPosition(elapsedTime);
+                }
+                });
+            t1.join();
+           
             while (gameplay) {
                 // check time after each loop
-                time_t currentTime = std::time(nullptr);
-                time_t elapsedTime = currentTime - startTime;
-                if (elapsedTime == 211) {
-                    texture = redbackgroundTexture;
-                    backgroundTexture = redbackgroundTexture;
-                    darkbackgroundTexture = darkredbackgroundTexture;
-                }
+                 currentTime = std::time(nullptr);
+                elapsedTime = currentTime - startTime;
+               
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
                         quit = true;
+                        gameplay = false;
+                        //save game
+                        saveGameState(noods, demSpeed, demWave, demNood, speed, demsp, maxWave, demkey, demperfect, perfect, good, miss, tooearly, waitlongnood, demlight, startTime, elapsedTime);
                     }
                 }
+                if (elapsedTime == 0) texture = backgroundTexture;
+                else if (elapsedTime == 211) texture = redbackgroundTexture;
                 if (demlight >= 50) {
 					demlight = 0;
 					if (texture == backgroundTexture) texture = darkbackgroundTexture;
+                    else if(texture==redbackgroundTexture) texture = darkredbackgroundTexture;
+					else if (texture == darkredbackgroundTexture) texture = redbackgroundTexture;
 					else texture = backgroundTexture;
 				}
                 demlight++;
