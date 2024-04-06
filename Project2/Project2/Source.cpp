@@ -378,10 +378,6 @@ int main(int argc, char* args[]) {
         //setup for gameplay
         if (gameplay == true) {
             //delete menu texture
-            SDL_DestroyTexture(menuTexture);
-            SDL_DestroyTexture(menu1Texture);
-            SDL_DestroyTexture(menu2Texture);
-            SDL_DestroyTexture(menu3Texture);
             SDL_Surface* backgroundSurface = IMG_Load("Image/gameplay.png");
             if (backgroundSurface == NULL) {
                 printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
@@ -411,7 +407,7 @@ int main(int argc, char* args[]) {
             SDL_FreeSurface(darkbackgroundSurface);
             SDL_Texture* backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
             SDL_FreeSurface(backgroundSurface);
-            texture = backgroundTexture;
+          
             SDL_Surface* goodSurface = IMG_Load("Image/good.png");
             SDL_Texture* goodTexture = SDL_CreateTextureFromSurface(renderer, goodSurface);
             SDL_FreeSurface(goodSurface);
@@ -444,86 +440,124 @@ int main(int argc, char* args[]) {
             int demlight = 0;
             maxWave = 125;
             //load game nếu file save game tồn tại và không bị trống
+           
             ifstream file("gameState.txt");
-
             // Kiểm tra xem file có tồn tại và không rỗng không
+            bool choiceloadgame = false;
             if (file.good() && file.peek() != std::ifstream::traits_type::eof()) {
                 // File tồn tại và không rỗng, tải game
+               
+                SDL_Surface* loadgameSurface = IMG_Load("Image/continue_or_newgame.png");
+                SDL_Texture* loadgameTexture = SDL_CreateTextureFromSurface(renderer, loadgameSurface);
+                SDL_FreeSurface(loadgameSurface);
+                SDL_SetTextureColorMod(texture,50,50,50);
+                destinationRect = { 0,0, 1080, 810 };
+                SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
+                while (true) {
+                   SDL_RenderCopyEx(renderer,loadgameTexture,&destinationRect,&destinationRect,0.0,NULL,SDL_FLIP_NONE);
+					SDL_RenderPresent(renderer);
+					SDL_Event e;
+					SDL_PollEvent(&e);
+					int x, y;
+					SDL_GetMouseState(&x, &y);
+                    if (e.type == SDL_MOUSEBUTTONDOWN) {
+                        if (y > 275, y < 400) {
+                            if (x > 150, x < 425) {
+                                choiceloadgame = true;
+                                break;
+                            }
+                            else if (x > 650, x < 975) {
+                                choiceloadgame = false;
+                                break;
+                            }
+                        }
+                    }
+
+                }
                 
 
                 // Load các biến
-                file >> demSpeed;
-                file >> demWave;
-                file >> demNood;
-                file >> speed;
-                file >> demsp;
-                file >> maxWave;
-                file >> demkey;
-                file >> demperfect;
-                file >> perfect;
-                file >> good;
-                file >> miss;
-                file >> tooearly;
-                file >> waitlongnood;
-                file >> demlight;
-                file >> startTime;
-                file >> elapsedTime;
+                if (choiceloadgame == true) {
+                    file >> demSpeed;
+                    file >> demWave;
+                    file >> demNood;
+                    file >> speed;
+                    file >> demsp;
+                    file >> maxWave;
+                    file >> demkey;
+                    file >> demperfect;
+                    file >> perfect;
+                    file >> good;
+                    file >> miss;
+                    file >> tooearly;
+                    file >> waitlongnood;
+                    file >> demlight;
+                    file >> startTime;
+                    file >> elapsedTime;
 
-                // Set lại startTime
-               
-
-                // Load vector noods
-                int x, y, type;
-                bool check;
-                while (file >> x >> y >> check >> type) {
-                  
-                  
-                    if (type == 1) {
-                        int length;
-                        bool isbeinghold;
-                        file >> length >> isbeinghold;
-                        Longnoods* longnood = new Longnoods;
-                        longnood->a = longnoodTexture;
-                        longnood->x = x;
-                        longnood->y = y;
-                        longnood->check = check;
-                        longnood->type = type;
-                        longnood->length = length;
-                        longnood->isbeinghold = isbeinghold;
-                        file >> longnood->length >> longnood->isbeinghold;
-                        noods.push_back(longnood);
+                    // Set lại startTime
 
 
+                    // Load vector noods
+                    int x, y, type;
+                    bool check;
+                    while (file >> x >> y >> check >> type) {
+
+
+                        if (type == 1) {
+                            int length;
+                            bool isbeinghold;
+                            file >> length >> isbeinghold;
+                            Longnoods* longnood = new Longnoods;
+                            longnood->a = longnoodTexture;
+                            longnood->x = x;
+                            longnood->y = y;
+                            longnood->check = check;
+                            longnood->type = type;
+                            longnood->length = length;
+                            longnood->isbeinghold = isbeinghold;
+                            file >> longnood->length >> longnood->isbeinghold;
+                            noods.push_back(longnood);
+
+
+                        }
+                        else {
+                            Noods* nood = new Noods;
+                            nood->a = noodTexture;
+                            nood->x = x;
+                            nood->y = y;
+                            nood->check = check;
+                            nood->type = type;
+                            noods.push_back(nood);
+
+                        }
                     }
-                    else {
-                    Noods* nood = new Noods;
-                    nood->a = noodTexture;
-                    nood->x = x;
-                    nood->y = y;
-                    nood->check = check;
-                    nood->type = type;
-                    noods.push_back(nood);
 
+                    file.close();
+
+                    // Xóa file sau khi đã tải xong
+                    std::remove("gameState.txt");
+                    if (elapsedTime >= 211) {
+                        texture = redbackgroundTexture;
                     }
-                }
+                    // nghỉ 1s để chờ nhạc chạy
 
-                file.close();
 
-                // Xóa file sau khi đã tải xong
-                std::remove("gameState.txt");
-                if (elapsedTime >= 211) {
-                    texture = redbackgroundTexture;
+                    SDL_Delay(1000);
                 }
-                // nghỉ 1s để chờ nhạc chạy
-                SDL_Delay(1000);
             }
-            if (elapsedTime > 0) {
+            SDL_DestroyTexture(menuTexture);
+            SDL_DestroyTexture(menu1Texture);
+            SDL_DestroyTexture(menu2Texture);
+            SDL_DestroyTexture(menu3Texture);
+            texture = backgroundTexture;
+            if (choiceloadgame) {
                 time_t currentTime = time(0);
                 startTime = currentTime - elapsedTime;
             }
-            t1 = std::thread([&music,elapsedTime]() {
+            t1 = std::thread([&music,elapsedTime,choiceloadgame]() {
                 Mix_PlayMusic(music, -1);
-                if (elapsedTime > 0) {
+                if (choiceloadgame) {
                     Mix_SetMusicPosition(elapsedTime);
                 }
                 });

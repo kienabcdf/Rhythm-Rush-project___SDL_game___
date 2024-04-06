@@ -141,6 +141,7 @@
     <Image Include="gameplay.png" />
     <Image Include="good.png" />
     <Image Include="how to play.png" />
+    <Image Include="Image\continue_or_newgame.png" />
     <Image Include="Image\gameplaydark.png" />
     <Image Include="Image\gameplayred.png" />
     <Image Include="Image\gameplayreddark.png" />
