@@ -89,6 +89,12 @@
     <Image Include="Image\continue_or_newgame.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Image\icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Image\bomb.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Media Include="AdhesiveWombat - 8 Bit Adventure.mp3">
@@ -100,10 +106,23 @@
     <Media Include="end.mp3">
       <Filter>Resource Files</Filter>
     </Media>
+    <Media Include="music\flash.mp3">
+      <Filter>Resource Files</Filter>
+    </Media>
   </ItemGroup>
   <ItemGroup>
     <Font Include="font.ttf">
       <Filter>Resource Files</Filter>
     </Font>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Project23.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

@@ -41,23 +41,34 @@ int creatnumberofnood() {
 	return numbernood[numberofnood];
 }
 //funtion to random position of nood with number of nood
+vector<int> generateUniqueRandomNumbers(int min, int max, int n) {
+    vector<int> numbers;
+    for (int i = min; i <= max; i++) {
+        numbers.push_back(i);
+    }
+
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator(seed);
+    std::shuffle(numbers.begin(), numbers.end(), generator);
+
+    numbers.resize(n);
+    return numbers;
+}
 vector<int> creatpositionofnood(int numbernood) {
     vector<int> result;
     if (numbernood % 2 == 0) {
-        
-        result= generateRandomNumbers(1, 3, numbernood/2);
+        result = generateUniqueRandomNumbers(1, 3, numbernood / 2);
         for (int i = 0; i < numbernood / 2; i++) { result.push_back(6 - result[i] + 1); }
         return result;
     }
     else {
-        int th=generateRandomNumber(1,2);
+        int th = generateRandomNumber(1, 2);
         if (th == 1) {
-           
-            return generateRandomNumbers(1, 3, numbernood);
+            return generateUniqueRandomNumbers(1, 3, numbernood);
         }
         else {
-            return generateRandomNumbers(4, 6, numbernood);
-		}
+            return generateUniqueRandomNumbers(4, 6, numbernood);
+        }
     }
     return result;
 }
@@ -108,6 +119,7 @@ void saveGameState(const vector<Noods*>& noods, float demSpeed, float demWave, i
     file << demlight << endl;
     file << startTime << endl;
     file << elapsedTime << endl;
+    
 
     // Lưu vector noods
     for ( Noods* nood : noods) {
@@ -123,7 +135,16 @@ void saveGameState(const vector<Noods*>& noods, float demSpeed, float demWave, i
 
     file.close();
 }
-// hàm load game
+void clearFile(const std::string& filename) {
+    std::ofstream file;
+    file.open(filename, std::ofstream::out | std::ofstream::trunc);
+    file.close();
+}
+
+       
+
+  
+	
 
 
 int main(int argc, char* args[]) {
@@ -162,6 +183,12 @@ int main(int argc, char* args[]) {
         printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
         return 1;
     }
+    SDL_Surface* bombSurface = IMG_Load("Image/bomb.png");
+    if (bombSurface == NULL) {
+		printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
+		return 1;
+	}
+
     SDL_Texture* noodTexture = SDL_CreateTextureFromSurface(renderer, noodSurface);
     SDL_FreeSurface(noodSurface);
     SDL_Rect noodRect = { 100,1.1, 100, 100 };
@@ -169,7 +196,8 @@ int main(int argc, char* args[]) {
     SDL_FreeSurface(longnoodSurface);
     SDL_Texture* longnood_holdTexture = SDL_CreateTextureFromSurface(renderer, longnood_holdSurface);
     SDL_FreeSurface(longnood_holdSurface);
-    
+    SDL_Texture* bombTexture = SDL_CreateTextureFromSurface(renderer, bombSurface);
+    SDL_FreeSurface(bombSurface);
     //create longnoodreact with full image of longnood
     SDL_Rect longnoodRect = { 205,50, 22, 200};
 
@@ -276,6 +304,16 @@ int main(int argc, char* args[]) {
             }
 
             SDL_Rect destinationRect = { 0,0.0, 1080, 810 };
+            // Get the current time
+            Uint32 currentTime = SDL_GetTicks();
+
+            // Calculate a value between 0 and 255 using a sin function for each color component
+            Uint8 red = 128 * (sin(currentTime / 500.0) + 1)+75; // Change every 500 ms
+            Uint8 green = 128 * (sin(currentTime / 750) + 1)+75; // Change every 1000 ms
+            Uint8 blue = 128 * (sin(currentTime / 650) + 1)+75; // Change every 2000 ms
+
+            // Set the color mod of the texture
+            SDL_SetTextureColorMod(texture, red, green, blue);
             SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
             SDL_RenderPresent(renderer);
    //get mouse position
@@ -369,6 +407,11 @@ int main(int argc, char* args[]) {
 		  printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
 		  return 1;
       }
+      Mix_Chunk* flashmusic = Mix_LoadWAV("music/flash.mp3");
+      if (flashmusic== NULL) {
+		  printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
+		  return 1;
+	  }
      
      //chỉnh âm lượng max cho các tik music
      Mix_VolumeChunk(tikmusiclist[0], MIX_MAX_VOLUME );
@@ -378,6 +421,7 @@ int main(int argc, char* args[]) {
         //setup for gameplay
         if (gameplay == true) {
             //delete menu texture
+            
             SDL_Surface* backgroundSurface = IMG_Load("Image/gameplay.png");
             if (backgroundSurface == NULL) {
                 printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
@@ -398,6 +442,11 @@ int main(int argc, char* args[]) {
                 printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
                 return 1;
             }
+            SDL_Texture* whiteTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1080, 810);
+            SDL_SetRenderTarget(renderer, whiteTexture);
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderClear(renderer);
+            SDL_SetRenderTarget(renderer, NULL);
             SDL_Texture* darkredbackgroundTexture = SDL_CreateTextureFromSurface(renderer, darkredbackgroundSurface);
             SDL_FreeSurface(darkredbackgroundSurface);
             SDL_Texture* redbackgroundTexture = SDL_CreateTextureFromSurface(renderer, redbackgroundSurface);
@@ -439,6 +488,8 @@ int main(int argc, char* args[]) {
             speed = 6;
             int demlight = 0;
             maxWave = 125;
+            int demflash = 0;
+            int controlFPS = 12;
             //load game nếu file save game tồn tại và không bị trống
            
             ifstream file("gameState.txt");
@@ -492,6 +543,7 @@ int main(int argc, char* args[]) {
                     file >> tooearly;
                     file >> waitlongnood;
                     file >> demlight;
+                  
                     file >> startTime;
                     file >> elapsedTime;
 
@@ -542,19 +594,22 @@ int main(int argc, char* args[]) {
                     }
                     // nghỉ 1s để chờ nhạc chạy
 
-
+                   
                     SDL_Delay(1000);
                 }
             }
+           
             SDL_DestroyTexture(menuTexture);
             SDL_DestroyTexture(menu1Texture);
             SDL_DestroyTexture(menu2Texture);
             SDL_DestroyTexture(menu3Texture);
+            clearFile("gameState.txt");
             texture = backgroundTexture;
             if (choiceloadgame) {
                 time_t currentTime = time(0);
                 startTime = currentTime - elapsedTime;
             }
+
             t1 = std::thread([&music,elapsedTime,choiceloadgame]() {
                 Mix_PlayMusic(music, -1);
                 if (choiceloadgame) {
@@ -564,6 +619,8 @@ int main(int argc, char* args[]) {
             t1.join();
            
             while (gameplay) {
+               
+                
                 // check time after each loop
                  currentTime = std::time(nullptr);
                 elapsedTime = currentTime - startTime;
@@ -578,7 +635,7 @@ int main(int argc, char* args[]) {
                 }
                 if (elapsedTime == 0) texture = backgroundTexture;
                 else if (elapsedTime == 211) texture = redbackgroundTexture;
-                if (demlight >= 50) {
+                if (demlight >= 50*(6/speed)) {
 					demlight = 0;
 					if (texture == backgroundTexture) texture = darkbackgroundTexture;
                     else if(texture==redbackgroundTexture) texture = darkredbackgroundTexture;
@@ -587,7 +644,7 @@ int main(int argc, char* args[]) {
 				}
                 demlight++;
                 destinationRect = { 0,0, 1080, 810 };
-                Uint8 brightness = 150 * (sin(SDL_GetTicks() / 500.0) + 1) / 2+105; // Tạo hiệu ứng nhấp nháy
+                Uint8 brightness = 150 * (sin(SDL_GetTicks() / 500.0*speed/6) + 1) / 2+105; // Tạo hiệu ứng nhấp nháy
                 SDL_SetTextureColorMod(texture, brightness, brightness, brightness);
                 SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
                 demSpeed += 1;
@@ -608,12 +665,14 @@ int main(int argc, char* args[]) {
                     demSpeed = 0;
                     for (Noods*& x : noods) {
                         if (x->check == true) {
-                            if (x->y >= 810&&x->type==0) {
+                            if (x->y >= 810&&(x->type==0||x->type==2)) {
                                 x->check = false;
-                                choice = 0;
+                               
                                 demperfect = 10;
-                                miss++;
+                          
                                 demsleep++;
+                                if(x->type==0) {miss++,choice=0;}
+                                else { perfect++; choice = 3; }
                             }
                             x->y += speed;//move nood and control speed
                             SDL_Rect noodrect = { x->x,x->y, 100, 100 };
@@ -628,9 +687,9 @@ int main(int argc, char* args[]) {
                                 renderLongnood(renderer, longnoodTexture, y->length, y->x + 30, y->y);
                             }
                             else {
-                                Uint8 r = 127 * (sin(SDL_GetTicks() / 1000.0) + 1); // Tạo hiệu ứng thay đổi màu sắc
-                                Uint8 g = 127 * (sin(SDL_GetTicks() / 500.0) + 1); // Tạo hiệu ứng thay đổi màu sắc
-                                Uint8 b = 127 * (sin(SDL_GetTicks() / 2000.0) + 1); // Tạo hiệu ứng thay đổi màu sắc
+                                Uint8 r = 127 * (sin(SDL_GetTicks() / 1000.0*speed/6) + 1); // Tạo hiệu ứng thay đổi màu sắc
+                                Uint8 g = 127 * (sin(SDL_GetTicks() / 500.0*speed/6) + 1); // Tạo hiệu ứng thay đổi màu sắc
+                                Uint8 b = 127 * (sin(SDL_GetTicks() / 2000.0*speed/6) + 1); // Tạo hiệu ứng thay đổi màu sắc
                                 SDL_SetTextureColorMod(x->a, r, g, b);
                                 SDL_RenderCopyEx(renderer, x->a, NULL, &noodrect, 0.0, NULL, SDL_FLIP_NONE);
                             }
@@ -646,10 +705,19 @@ int main(int argc, char* args[]) {
                         vector<int> position = creatpositionofnood(creatnumberofnood());
                         if (elapsedTime <= 268 && !(elapsedTime >= 206 && elapsedTime <= 210)) {
                             int type = generateRandomNumber(1, 10);
-                            if (elapsedTime < 1|| type>3) {
+                            if (elapsedTime < 10|| type>3) {
                                 for (int i = 0; i < position.size(); i++) {
                                     Noods* nood = new Noods;
-                                    nood->a = noodTexture;
+                                    int ratebombnood = generateRandomNumber(1, 10);
+                                    if (ratebombnood == 1&&elapsedTime>=211) {
+										nood->a = bombTexture;
+										nood->type = 2;
+									}
+									else {
+                                        nood->a = noodTexture;
+                                        nood->type = 0;
+                                    }
+                                   
                                     nood->x = positionnood[position[i] - 1];
                                     nood->y = 0;
                                     nood->check = true;
@@ -731,10 +799,16 @@ int main(int argc, char* args[]) {
                                 if (x->x == 59 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_S]) {
 
 
-                                    if (x->type == 0) x->check = false;
-                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
-                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
-                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+                                    if (x->type == 0||x->type==2) x->check = false;
+                                    if (x->type != 2) {
+                                        if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                        else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                        else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+                                    }
+                                    else {
+                                        miss++;
+                                        choice = 0;
+                                    }
 
                                     if (x->type == 1) {
                                         Longnoods* y = (Longnoods*)x;
@@ -742,134 +816,235 @@ int main(int argc, char* args[]) {
 
                                     }
                                     demsleep = 0;
-                                    
-                                    thread tikMusicThread([&tikmusiclist]() {
+                                    if (x->type != 2) {
+                                        thread tikMusicThread([&tikmusiclist]() {
 
-                                        Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
+                                            Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
 
-                                        });
+                                            });
 
-                                 
-                                    tikMusicThread.detach();
+
+                                        tikMusicThread.detach();
+                                    }
+                                    else {
+                                        demflash = 325;
+                                        Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
+                                        thread flashMusicThread([&flashmusic]() {
+                                            //chỉnh âm lượng cho flash music
+                                            Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
+                                            //chinh âm lượng cho music
+
+                                            Mix_PlayChannel(-1, flashmusic, 0);
+                                            });
+                                        flashMusicThread.detach();
+									}
+
                                 }
                                 else if (x->x == 205 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_D]) {
-                                    if (x->type == 0) x->check = false;
-
-                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
-                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
-                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
-
+                                    if (x->type == 0 || x->type == 2) x->check = false;
+                                    if (x->type != 2) {
+                                        if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                        else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                        else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+                                    }
+                                    else {
+                                        miss++;
+                                        choice = 0;
+                                    }
 
                                     if (x->type == 1) {
                                         Longnoods* y = (Longnoods*)x;
-
                                         y->isbeinghold = true;
+
                                     }
                                     demsleep = 0;
-                                    thread tikMusicThread([&tikmusiclist]() {
+                                    if (x->type != 2) {
+                                        thread tikMusicThread([&tikmusiclist]() {
 
-                                       Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
-                                   
-                                        });
+                                            Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
+
+                                            });
 
 
-                                    tikMusicThread.detach();
+                                        tikMusicThread.detach();
+                                    }
+                                    else {
+                                        demflash = 325;
+                                        Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
+                                        thread flashMusicThread([&flashmusic]() {
+                                            //chỉnh âm lượng cho flash music
+                                            Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
+                                            //chinh âm lượng cho music
+
+                                            Mix_PlayChannel(-1, flashmusic, 0);
+                                            });
+                                        flashMusicThread.detach();
+                                    }
                                   
                                 }
                                 else if (x->x == 331 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_F]) {
-                                    if (x->type == 0) x->check = false;
-
-                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
-                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
-                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
-
+                                    if (x->type == 0 || x->type == 2) x->check = false;
+                                    if (x->type != 2) {
+                                        if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                        else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                        else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+                                    }
+                                    else {
+                                        miss++;
+                                        choice = 0;
+                                    }
 
                                     if (x->type == 1) {
                                         Longnoods* y = (Longnoods*)x;
-
                                         y->isbeinghold = true;
+
                                     }
                                     demsleep = 0;
+                                    if (x->type != 2) {
+                                        thread tikMusicThread([&tikmusiclist]() {
 
-                                    thread tikMusicThread([&tikmusiclist]() {
+                                            Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
 
-                                        Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
-
-                                        });
+                                            });
 
 
-                                    tikMusicThread.detach();
-                                   
+                                        tikMusicThread.detach();
+                                    }
+                                    else {
+                                        demflash = 325;
+                                        Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
+                                        thread flashMusicThread([&flashmusic]() {
+                                            //chỉnh âm lượng cho flash music
+                                            Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
+                                            //chinh âm lượng cho music
+
+                                            Mix_PlayChannel(-1, flashmusic, 0);
+                                            });
+                                        flashMusicThread.detach();
+                                    }
                                 }
                                 else if (x->x == 605 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_J]) {
-                                    if (x->type == 0) x->check = false;
-
-                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
-                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
-                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
-
-
-
+                                    if (x->type == 0 || x->type == 2) x->check = false;
+                                    if (x->type != 2) {
+                                        if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                        else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                        else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+                                    }
+                                    else {
+                                        miss++;
+                                        choice = 0;
+                                    }
 
                                     if (x->type == 1) {
                                         Longnoods* y = (Longnoods*)x;
-
                                         y->isbeinghold = true;
+
                                     }
                                     demsleep = 0;
-                                    thread tikMusicThread([&tikmusiclist]() {
+                                    if (x->type != 2) {
+                                        thread tikMusicThread([&tikmusiclist]() {
 
-                                        Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
+                                            Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
 
-                                        });
+                                            });
 
-                                    tikMusicThread.detach();
+
+                                        tikMusicThread.detach();
+                                    }
+                                    else {
+                                        demflash = 325;
+                                        Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
+                                        thread flashMusicThread([&flashmusic]() {
+                                            //chỉnh âm lượng cho flash music
+                                            Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
+                                            //chinh âm lượng cho music
+
+                                            Mix_PlayChannel(-1, flashmusic, 0);
+                                            });
+                                        flashMusicThread.detach();
+                                    }
                                 }
                                 else if (x->x == 751 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_K]) {
-                                    if (x->type == 0) x->check = false;
-
-                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
-                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
-                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
-
-
-
+                                    if (x->type == 0 || x->type == 2) x->check = false;
+                                    if (x->type != 2) {
+                                        if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                        else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                        else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+                                    }
+                                    else {
+                                        miss++;
+                                        choice = 0;
+                                    }
 
                                     if (x->type == 1) {
                                         Longnoods* y = (Longnoods*)x;
-
                                         y->isbeinghold = true;
+
                                     }
                                     demsleep = 0;
-                                    thread tikMusicThread([&tikmusiclist]() {
+                                    if (x->type != 2) {
+                                        thread tikMusicThread([&tikmusiclist]() {
 
-                                        Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
+                                            Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
 
-                                        });
+                                            });
 
-                                    tikMusicThread.detach();
+
+                                        tikMusicThread.detach();
+                                    }
+                                    else {
+                                        demflash = 325;
+                                        Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
+                                        thread flashMusicThread([&flashmusic]() {
+                                            //chỉnh âm lượng cho flash music
+                                            Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
+                                            //chinh âm lượng cho music
+
+                                            Mix_PlayChannel(-1, flashmusic, 0);
+                                            });
+                                        flashMusicThread.detach();
+                                    }
                                 }
                                 else if (x->x == 876 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_L]) {
-                                    if (x->type == 0) x->check = false;
-
-                                    if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
-                                    else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
-                                    else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
-
+                                    if (x->type == 0 || x->type == 2) x->check = false;
+                                    if (x->type != 2) {
+                                        if (x->y >= 525 && x->y < 575) { choice = 1; demperfect = 10; tooearly++; }
+                                        else if ((x->y >= 575 && x->y < 630) || (x->y >= 740 && x->y < 800)) { choice = 2; demperfect = 10; good++; }
+                                        else if (x->y >= 630 && x->y < 740) { choice = 3; demperfect = 10; perfect++; }
+                                    }
+                                    else {
+                                        miss++;
+                                        choice = 0;
+                                    }
 
                                     if (x->type == 1) {
                                         Longnoods* y = (Longnoods*)x;
-
                                         y->isbeinghold = true;
+
                                     }
                                     demsleep = 0;
-                                    thread tikMusicThread([&tikmusiclist]() {
+                                    if (x->type != 2) {
+                                        thread tikMusicThread([&tikmusiclist]() {
 
-                                        Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
+                                            Mix_PlayChannel(-1, tikmusiclist[generateRandomNumber(0, tikmusiclist.size() - 1)], 0);
 
-                                        });
+                                            });
 
-                                    tikMusicThread.detach();
+
+                                        tikMusicThread.detach();
+                                    }
+                                    else {
+                                        demflash = 325;
+                                        Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
+                                        thread flashMusicThread([&flashmusic]() {
+                                            //chỉnh âm lượng cho flash music
+                                            Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
+                                            //chinh âm lượng cho music
+
+                                            Mix_PlayChannel(-1, flashmusic, 0);
+                                            });
+                                        flashMusicThread.detach();
+                                    }
                                 }
                                 
                                 demkey=10;
@@ -968,6 +1143,7 @@ int main(int argc, char* args[]) {
                
               
                     if (SDL_GetKeyboardState(NULL)[SDL_SCANCODE_ESCAPE]) {
+
                         Mix_PauseMusic();
                         SDL_Surface* pauseSurface = IMG_Load("Image/pause.png");
                         SDL_Texture* pauseTexture = SDL_CreateTextureFromSurface(renderer, pauseSurface);
@@ -976,6 +1152,15 @@ int main(int argc, char* args[]) {
                         SDL_RenderCopyEx(renderer, pauseTexture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
                         SDL_RenderPresent(renderer);
                         while (true) {
+                            if (SDL_PollEvent(&e)) {
+                                if (e.type == SDL_QUIT) {
+									quit = true;
+									gameplay = false;
+									//save game
+									saveGameState(noods, demSpeed, demWave, demNood, speed, demsp, maxWave, demkey, demperfect, perfect, good, miss, tooearly, waitlongnood, demlight, startTime, elapsedTime);
+									break;
+								}
+							}
                             //if mouse click
                             SDL_PollEvent(&e);
                             if (e.type == SDL_MOUSEBUTTONDOWN) {
@@ -1009,7 +1194,9 @@ int main(int argc, char* args[]) {
                                     speed = 6;
                                     demsp = 0;
                                     maxWave = 125;
+                                    
                                     break;
+
                                 }
                                 else if (y > 510 && y < 580 && x>610 && x < 730) {
                                     gameplay = false;
@@ -1040,11 +1227,42 @@ int main(int argc, char* args[]) {
                     t2.join();
                 }
                 //renderer gameplay
+                          //if q is pressed
+                if (SDL_GetKeyboardState(NULL)[SDL_SCANCODE_Q]) {
+                    demflash = 325;
+                    Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
+                    thread flashMusicThread([&flashmusic]() {
+                        //chỉnh âm lượng cho flash music
+                        Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME*0.3);
+                       //chinh âm lượng cho music
+                        					
+						Mix_PlayChannel(-1,flashmusic, 0);
+						});
+                    flashMusicThread.detach();
+                }
+                if (demflash > 0) {
+                    demflash--;
+                    // Calculate the elapsed time
+                    
+                    
+                    // Calculate the alpha value using a sin function
+                    Uint8 alpha = 128 * (sin(SDL_GetTicks() / 2000.0) + 1);
+
+                    // Set the alpha mod of the white texture
+                    SDL_SetTextureAlphaMod(whiteTexture, alpha);
+
+                    // Render the white texture over the entire screen
+                    SDL_RenderCopy(renderer, whiteTexture, NULL, NULL);
+
+                    if (demflash == 1) {
+                        Mix_VolumeMusic(MIX_MAX_VOLUME);
+                    }
+				}
                 SDL_RenderPresent(renderer);
              
-                SDL_Delay(12);
+                SDL_Delay(controlFPS);
                //check to end game
-                if (((size(noods) == 0 || noods.back()->check == false) && elapsedTime >= 272)||demsleep>=20) {
+                if (((size(noods) == 0 || noods.back()->check == false) && elapsedTime >= 272)||demsleep>=50) {
                     Mix_HaltMusic();
                     //end music
                     Mix_Music* end = Mix_LoadMUS("music/end.mp3");
@@ -1165,6 +1383,11 @@ int main(int argc, char* args[]) {
                     while (true) {
 						//check button be clicked
 						SDL_PollEvent(&e);
+                        if (e.type == SDL_QUIT) {
+							quit = true;
+							gameplay = false;
+							break;
+						}
                         if (e.type == SDL_MOUSEBUTTONDOWN) {
                             int x, y;
 							SDL_GetMouseState(&x, &y);
@@ -1229,6 +1452,7 @@ int main(int argc, char* args[]) {
                 //check time
                 cout << elapsedTime<<" ";
                 cout<<speed<<" "<<maxWave<<endl;
+
                
             }
             startTime = std::time(nullptr);
@@ -1239,6 +1463,7 @@ int main(int argc, char* args[]) {
         Mix_FreeChunk(tikmusiclist[0]);
         Mix_FreeChunk(tikmusiclist[1]);
         Mix_FreeChunk(tikmusiclist[2]);
+        Mix_FreeChunk(flashmusic);
         //endgame
        
     }
@@ -1250,6 +1475,7 @@ int main(int argc, char* args[]) {
     SDL_DestroyTexture(noodTexture);
     SDL_DestroyTexture(longnoodTexture);
     SDL_DestroyTexture(longnood_holdTexture);
+    SDL_DestroyTexture(bombTexture);
     SDL_Quit();
     return 0;
 }

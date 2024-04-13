@@ -141,10 +141,12 @@
     <Image Include="gameplay.png" />
     <Image Include="good.png" />
     <Image Include="how to play.png" />
+    <Image Include="Image\bomb.png" />
     <Image Include="Image\continue_or_newgame.png" />
     <Image Include="Image\gameplaydark.png" />
     <Image Include="Image\gameplayred.png" />
     <Image Include="Image\gameplayreddark.png" />
+    <Image Include="Image\icon.ico" />
     <Image Include="Image\longnood.png" />
     <Image Include="Image\longnood_hold.jpg" />
     <Image Include="Menu.png" />
@@ -161,9 +163,16 @@
     <Media Include="AdhesiveWombat - 8 Bit Adventure.mp3" />
     <Media Include="end.mp3" />
     <Media Include="menu.mp3" />
+    <Media Include="music\flash.mp3" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="font.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource2.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Project23.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
