@@ -24,7 +24,8 @@ Clone the project from GitHub to your computer:
 bash
 Copy code
 git clone https://github.com/kienabcdf/project
-Compile the project using a C++ compiler and SDL.
+or download raw file from this project.
+
 Usage
 
 Running the Project:
