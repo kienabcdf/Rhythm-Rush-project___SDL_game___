@@ -12,6 +12,12 @@ Multiple difficulty levels to challenge players.
 
 Beautiful interface and immersive sound effects.
 
+Automatic game saving feature to resume progress.
+
+User-friendly menu interface for easy navigation.
+
+Ability to pause the game for convenience.
+
 Installation:
 
 System Requirements:
