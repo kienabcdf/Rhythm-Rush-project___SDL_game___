@@ -8,7 +8,7 @@ Features:
 Engaging rhythm-based gameplay with exciting challenges.
 Multiple difficulty levels to challenge players.
 Beautiful interface and immersive sound effects.
-Installation
+Installation:
 System Requirements:
 
 Windows, Linux, or macOS operating system.
