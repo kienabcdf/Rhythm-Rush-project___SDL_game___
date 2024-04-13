@@ -18,27 +18,21 @@ Installation:
 Clone the project from GitHub to your computer:
 bash
 Copy code
-git clone https://github.com/your_username/rhythm-rush.git
+git clone https://github.com/kienabcdf/project
 Compile the project using a C++ compiler and SDL.
 Usage
 Running the Project:
 
-Open Command Prompt or Terminal and navigate to the project directory.
-Run the game using the command:
-bash
-Copy code
-./rhythm-rush
+Navigate to the project2 directory where the executable file (rhythm-rush.exe) is located.
+Double-click on the rhythm-rush.exe file to launch the game.
+Alternatively, viewers can refer to the source.cpp file in the project2 directory to review the source code.
+
 Documentation:
 
 Usage instructions and customization options are available in the README file or project documentation.
-Contribution
-We welcome contributions from the community. If you would like to contribute to the project, please follow these steps:
 
-Fork the project and create a new branch.
-Make necessary changes in your branch.
-Create a pull request with a detailed description of your changes.
 License
-The project is distributed under the MIT License and is free to use, copy, distribute, or modify.
+The project is free to use, copy, distribute, or modify.
 
 Contact
-If you have any questions or suggestions, please feel free to contact us via email: your_email@example.com.
+If you have any questions or suggestions, please feel free to contact us via email: ttk08112005@gmail.com
