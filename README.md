@@ -18,6 +18,18 @@ User-friendly menu interface for easy navigation.
 
 Ability to pause the game for convenience.
 
+Knowledge Algorithms Used:
+
+Object-Oriented Programming (OOP): Implemented OOP principles for managing game systems and the node data structure.
+
+Inheritance: Utilized inheritance for system management and organizing data structures within the game.
+
+Multithreading: Employed multithreading to handle audio and visual effects separately for optimizing game performance.
+
+Interactive Sound Effects: Integrated high-interaction sound effects using SDL's audio spatialization features, enhancing the player's experience.
+
+Dynamic Image Effects: Implemented dynamic image effects by overlaying layers on textures and adjusting them using a time-based effect management system within the main loop.
+
 Installation:
 
 System Requirements:
