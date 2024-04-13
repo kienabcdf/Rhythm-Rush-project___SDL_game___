@@ -4,7 +4,7 @@ Welcome to the Rhythm Rush project!
 
 Rhythm Rush is a dynamic rhythm game developed using C++ programming language and utilizing the SDL library for building. The project is created by Tran Trung Kien - a student at the University of Technology, Vietnam National University, as part of an assignment in the course.
 
-Features
+Features:
 Engaging rhythm-based gameplay with exciting challenges.
 Multiple difficulty levels to challenge players.
 Beautiful interface and immersive sound effects.
