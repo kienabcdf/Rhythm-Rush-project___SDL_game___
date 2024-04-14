@@ -45,15 +45,15 @@ Installation:
 Clone the project from GitHub to your computer:
 bash
 Copy code
-git clone https://github.com/kienabcdf/project
+git clone https://github.com/kienabcdf/Rhythm-Rush-project___SDL_game___
 or download raw file from this project.
 
 #Usage
 
 Running the Project:
 
-Navigate to the project2 directory where the executable file (rhythm-rush.exe) is located.
-Double-click on the rhythm-rush.exe file to launch the game.
+Navigate to the project2 directory where the executable file (Rhythm Rush(shortcut)) is located.
+Double-click on file to launch the game.
 Alternatively, viewers can refer to the source.cpp file in the project2 directory to review the source code and if you use VS, you can use file.sln to build this project quickly.
 
 #Documentation:
