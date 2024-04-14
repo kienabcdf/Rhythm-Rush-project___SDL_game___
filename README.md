@@ -46,6 +46,7 @@ Clone the project from GitHub to your computer:
 bash
 Copy code
 git clone https://github.com/kienabcdf/Rhythm-Rush-project___SDL_game___
+
 or download raw file from this project.
 
 #Usage
