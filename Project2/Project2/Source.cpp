@@ -13,19 +13,19 @@
 using namespace std;
 
 
-//creat a funtion to generate random number from seed time
+//creat a funtion to generate random number from system
 int generateRandomNumber(int min, int max) {
-    // Use the current time as the seed
+   
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
-    // Initialize a random number generator
+    
     std::default_random_engine generator(seed);
 
     // Generate a random number between min and max
     std::uniform_int_distribution<int> distribution(min, max);
     return distribution(generator);
 }
-//creat a funtion to generate n random numbers from seed time
+//creat a funtion to generate n random numbers
 vector<int> generateRandomNumbers(int min, int max, int n) {
 	vector<int> result;
     for (int i = 0; i < n; i++) {
@@ -84,6 +84,7 @@ struct Longnoods:Noods {
     bool isbeinghold;
     int type = 1;
 };
+//funtion to render longnood
 void renderLongnood(SDL_Renderer* renderer, SDL_Texture* longnoodTexture, int customLength, int posX, int posY) {
     // Tạo SDL_Rect cho phần đầu của longnood
     SDL_Rect headRect = { 0, 0, 88, customLength/2*4.5 };
@@ -98,7 +99,7 @@ void renderLongnood(SDL_Renderer* renderer, SDL_Texture* longnoodTexture, int cu
 // hàm save game
 
 
-void saveGameState(const vector<Noods*>& noods, float demSpeed, float demWave, int demNood, int speed, int demsp, int maxWave, int demkey, int demperfect, int perfect, int good, int miss, int tooearly, int waitlongnood, int demlight, time_t startTime, time_t elapsedTime) {
+void saveGameState(const vector<Noods*>& noods, float demSpeed, float demWave, int demNood, int speed, int demsp, int maxWave, int demkey, int demperfect, int perfect, int good, int miss, int tooearly, int waitlongnood, int demlight,int controlFPS, time_t startTime, time_t elapsedTime) {
     ofstream file;
     file.open("gameState.txt");
 
@@ -117,6 +118,7 @@ void saveGameState(const vector<Noods*>& noods, float demSpeed, float demWave, i
     file << tooearly << endl;
     file << waitlongnood << endl;
     file << demlight << endl;
+    file << controlFPS << endl;
     file << startTime << endl;
     file << elapsedTime << endl;
     
@@ -135,6 +137,7 @@ void saveGameState(const vector<Noods*>& noods, float demSpeed, float demWave, i
 
     file.close();
 }
+// funtion clear file save game
 void clearFile(const std::string& filename) {
     std::ofstream file;
     file.open(filename, std::ofstream::out | std::ofstream::trunc);
@@ -156,7 +159,7 @@ int main(int argc, char* args[]) {
         return 1;
     }
 
-    SDL_Window* window = SDL_CreateWindow("SDL 2.0 Basic Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1080, 810, SDL_WINDOW_SHOWN);
+    SDL_Window* window = SDL_CreateWindow("Rhythm Rush", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1080, 810, SDL_WINDOW_SHOWN);
     if (window == NULL) {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         return 1;
@@ -168,6 +171,7 @@ int main(int argc, char* args[]) {
         printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
         return 1;
     }
+    //load surface and texture 
     SDL_Surface* noodSurface = IMG_Load("Image/nood.png");
     if (noodSurface == NULL) {
         printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
@@ -211,20 +215,21 @@ int main(int argc, char* args[]) {
     SDL_Rect destinationRect = { 0,0, 1080, 810 };
     SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
     
-    
-    Noods nood;
-    nood.a = noodTexture;
-    nood.x = 59;
-    nood.y = 0;
-    nood.check = true;
-    //creat vector nood for gameplay
-    vector<Noods*> noods;
-    
-    Longnoods longnood;
-    longnood.a = longnoodTexture;
-    longnood.x = 205;
-    longnood.y = 0;
-    longnood.check = true;
+    //////////////////////////////////////////
+    Noods nood;                         ////////
+    nood.a = noodTexture;			   ////////
+    nood.x = 59;					   ////////
+    nood.y = 0;						   ////////
+    nood.check = true;				   ////////
+    //creat vector nood for gameplay    ////////
+    vector<Noods*> noods;			   ////////
+    		                           ////////
+    Longnoods longnood;				 ////////
+    longnood.a = longnoodTexture;	 ////////
+    longnood.x = 205;				 ////////
+    longnood.y = 0;					 ////////
+    longnood.check = true;			 ////////
+    //////////////////////////////////////////
     SDL_RenderPresent(renderer);
 
     //loop of opentexture go to game if mouse click
@@ -240,28 +245,30 @@ int main(int argc, char* args[]) {
     bool quit = false;
     SDL_Event e;
     // variable to control speed and number of nood
-    int demsleep = 0;
-    float demSpeed = 0;
-    float demWave = 0;
-    int demNood = 0;
-    int speed = 6;
-    int demsp = 0;
-    int maxWave = 125;
-    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-        return 1;
-    }
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
-        return 1;
-    }
-
-    // load menu music
-    Mix_Music* music = Mix_LoadMUS("music/menu.mp3");
-    if (music == NULL) {
-        printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
-        return 1;
-    }
+    int demsleep = 0;           //////////////////
+    float demSpeed = 0;          ////////////////           
+    float demWave = 0;		   ////////////////
+    int demNood = 0;		   ////////////////
+    int speed = 6;			   ////////////////
+    int demsp = 0;			   ////////////////
+    int maxWave = 125;		   ////////////////
+    /////////////////////////////////////////////////
+    //init SDL_mixer////////////////////////////////////////////////////////////////////////
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {                                         ///////////
+        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());	  ///////////
+        return 1;															  ///////////
+    }																		  ///////////
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {			  ///////////
+        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError()); ///////////
+        return 1;																	/////////////
+    }																				/////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // load menu music////////////////////////////////////////////////////////////////////////
+    Mix_Music* music = Mix_LoadMUS("music/menu.mp3");									  ///////////
+    if (music == NULL) {															  ///////////
+        printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());	  ///////////
+        return 1;																  ///////////
+    }/////////////////////////////////////////////////////////////////////////////////////////
     //main loop start menu 
     while (!quit) {
         while (SDL_PollEvent(&e) != 0) {
@@ -270,28 +277,29 @@ int main(int argc, char* args[]) {
                 gameplay = false;
             }
         }
-        SDL_Surface* menuSurface = IMG_Load("Image/Menu.png");
-        SDL_Texture* menuTexture = SDL_CreateTextureFromSurface(renderer, menuSurface);
-        SDL_FreeSurface(menuSurface);
-        SDL_Surface* menu1Surface = IMG_Load("Image/Menu1.png");
-        SDL_Texture* menu1Texture = SDL_CreateTextureFromSurface(renderer, menu1Surface);
-        SDL_FreeSurface(menu1Surface);
-
-        SDL_Surface* menu2Surface = IMG_Load("Image/Menu2.png");
-        SDL_Texture* menu2Texture = SDL_CreateTextureFromSurface(renderer, menu2Surface);
-        SDL_FreeSurface(menu2Surface);
-
-        SDL_Surface* menu3Surface = IMG_Load("Image/Menu3.png");
-        SDL_Texture* menu3Texture = SDL_CreateTextureFromSurface(renderer, menu3Surface);
-        SDL_FreeSurface(menu3Surface);
-        texture = menuTexture;
-        //thread to play menu music and play again if music menu end
-        std::thread t1([&music]() {
-            Mix_PlayMusic(music, -1);
-            if (music == NULL) Mix_PlayMusic(music, -1);
-
-            });
-        t1.join();
+        //load menu texture////////////////////////////////////////////////////////////////////////
+        SDL_Surface* menuSurface = IMG_Load("Image/Menu.png");								  ///////////
+        SDL_Texture* menuTexture = SDL_CreateTextureFromSurface(renderer, menuSurface);	  ///////////
+        SDL_FreeSurface(menuSurface);													  ///////////
+        SDL_Surface* menu1Surface = IMG_Load("Image/Menu1.png");							  ///////////
+        SDL_Texture* menu1Texture = SDL_CreateTextureFromSurface(renderer, menu1Surface);  ///////////
+        SDL_FreeSurface(menu1Surface);													  ///////////
+        SDL_Surface* menu2Surface = IMG_Load("Image/Menu2.png");							  ///////////
+        SDL_Texture* menu2Texture = SDL_CreateTextureFromSurface(renderer, menu2Surface);  ///////////
+        SDL_FreeSurface(menu2Surface);													  ///////////
+        SDL_Surface* menu3Surface = IMG_Load("Image/Menu3.png");    			  ///////////
+        SDL_Texture* menu3Texture = SDL_CreateTextureFromSurface(renderer, menu3Surface);  ///////////
+        SDL_FreeSurface(menu3Surface);													  ///////////
+        texture = menuTexture;															  ///////////
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //thread to play menu music and play again if music menu end///////////////////////////////
+        std::thread t1([&music]() {                                 ///////////////////////////////
+            Mix_PlayMusic(music, -1);								///////////////////////////////
+            if (music == NULL) Mix_PlayMusic(music, -1);			///////////////////////////////
+                                                                    ///////////////////////////////
+            });														///////////////////////////////
+        t1.join();													///////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////
         //menu loop
         while (!quit) {
 
@@ -302,21 +310,17 @@ int main(int argc, char* args[]) {
                     break;
                 }
             }
-
-            SDL_Rect destinationRect = { 0,0.0, 1080, 810 };
-            // Get the current time
-            Uint32 currentTime = SDL_GetTicks();
-
-            // Calculate a value between 0 and 255 using a sin function for each color component
-            Uint8 red = 128 * (sin(currentTime / 500.0) + 1)+75; // Change every 500 ms
-            Uint8 green = 128 * (sin(currentTime / 750) + 1)+75; // Change every 1000 ms
-            Uint8 blue = 128 * (sin(currentTime / 650) + 1)+75; // Change every 2000 ms
-
-            // Set the color mod of the texture
-            SDL_SetTextureColorMod(texture, red, green, blue);
-            SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
-            SDL_RenderPresent(renderer);
-   //get mouse position
+            //render and change color of menu////////////////////////////////////////////////////////////////////////
+            SDL_Rect destinationRect = { 0,0.0, 1080, 810 };                            ///////////////////////////////
+            Uint32 currentTime = SDL_GetTicks();										///////////////////////////////
+            Uint8 red = 128 * (sin(currentTime / 500.0) + 1)+75; 					 ///////////////////////////////
+            Uint8 green = 128 * (sin(currentTime / 750) + 1)+75; 					 ///////////////////////////////
+            Uint8 blue = 128 * (sin(currentTime / 650) + 1)+75; 					 ///////////////////////////////
+            SDL_SetTextureColorMod(texture, red, green, blue);						 ///////////////////////////////
+            SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);////////////////
+            SDL_RenderPresent(renderer);											 ///////////////////////////////
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+            //menu button interface/////////////////////////////////////////////////////////////////////////////////////////////////////////
             int x, y;
             SDL_GetMouseState(&x, &y);
             //action with each button of menu be clicked
@@ -385,43 +389,45 @@ int main(int argc, char* args[]) {
                 texture = menuTexture;
             }
         }
-        // Load gameplay music
-        Mix_Music* music = Mix_LoadMUS("music/AdhesiveWombat - 8 Bit Adventure.mp3");
-        if (music == NULL) {
-            printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
-            return 1;
-        }
-        vector<Mix_Chunk*> tikmusiclist(3);
-      tikmusiclist[0] = Mix_LoadWAV("music/tik1.mp3");
-      if (tikmusiclist[0] == NULL) {
-			printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
-			return 1;
-		}
-      tikmusiclist[1] = Mix_LoadWAV("music/tik2.mp3");
-      if (tikmusiclist[1] == NULL) {
-          printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
-          return 1;
-      }
-      tikmusiclist[2] = Mix_LoadWAV("music/tik3.mp3");
-      if (tikmusiclist[2] == NULL) {
-		  printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
-		  return 1;
-      }
-      Mix_Chunk* flashmusic = Mix_LoadWAV("music/flash.mp3");
-      if (flashmusic== NULL) {
-		  printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());
-		  return 1;
-	  }
-     
-     //chỉnh âm lượng max cho các tik music
-     Mix_VolumeChunk(tikmusiclist[0], MIX_MAX_VOLUME );
-     Mix_VolumeChunk(tikmusiclist[1], MIX_MAX_VOLUME );
-     Mix_VolumeChunk(tikmusiclist[2], MIX_MAX_VOLUME );
-
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Load gameplay music//////////////////////////////////////////////////////////////
+        Mix_Music* music = Mix_LoadMUS("music/AdhesiveWombat - 8 Bit Adventure.mp3");////////
+        if (music == NULL) {															////////
+            printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());		////////
+            return 1;																	////////
+        }																				////////
+        ///////////////////////////////////////////////////////////////////////////////////////
+        //load effect music//////////////////////////////////////////////////////////////////////////
+        vector<Mix_Chunk*> tikmusiclist(3);                                             /////////////
+      tikmusiclist[0] = Mix_LoadWAV("music/tik1.mp3");								  /////////////
+      if (tikmusiclist[0] == NULL) {													  /////////////
+			printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());	  /////////////
+			return 1;                                                                   /////////////
+		}																			  /////////////
+      tikmusiclist[1] = Mix_LoadWAV("music/tik2.mp3");								  /////////////
+      if (tikmusiclist[1] == NULL) {													  /////////////
+          printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());	  /////////////
+          return 1;																   /////////////
+      }																			  /////////////
+      tikmusiclist[2] = Mix_LoadWAV("music/tik3.mp3");								  /////////////
+      if (tikmusiclist[2] == NULL) {													  /////////////
+		  printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());	  /////////////
+		  return 1;																   /////////////
+	  }																			  /////////////
+      Mix_Chunk* flashmusic = Mix_LoadWAV("music/flash.mp3");						  /////////////
+      if (flashmusic== NULL) {													  /////////////
+		  printf("Failed to load music! SDL_mixer Error: %s\n", Mix_GetError());	  /////////////
+		  return 1;																   /////////////
+	  }																			  /////////////
+     ///////////////////////////////////////////////////////////////////////////////////////////////////
+     //chỉnh âm lượng max cho các tik music////////////////////////////
+     Mix_VolumeChunk(tikmusiclist[0], MIX_MAX_VOLUME );             //
+     Mix_VolumeChunk(tikmusiclist[1], MIX_MAX_VOLUME );			 //
+     Mix_VolumeChunk(tikmusiclist[2], MIX_MAX_VOLUME );			 //
+     //////////////////////////////////////////////////////////////////
         //setup for gameplay
         if (gameplay == true) {
-            //delete menu texture
-            
+            //load background for gameplay/////////////////////////////////////////////////////////////////////////////////////////////////
             SDL_Surface* backgroundSurface = IMG_Load("Image/gameplay.png");
             if (backgroundSurface == NULL) {
                 printf("SDL could not load image! SDL Error: %s\n", SDL_GetError());
@@ -456,7 +462,7 @@ int main(int argc, char* args[]) {
             SDL_FreeSurface(darkbackgroundSurface);
             SDL_Texture* backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
             SDL_FreeSurface(backgroundSurface);
-          
+          //load effect texture////////////////////////////////////////////////////////////////////////////////////////
             SDL_Surface* goodSurface = IMG_Load("Image/good.png");
             SDL_Texture* goodTexture = SDL_CreateTextureFromSurface(renderer, goodSurface);
             SDL_FreeSurface(goodSurface);
@@ -469,11 +475,7 @@ int main(int argc, char* args[]) {
             SDL_Surface* tooearlySurface = IMG_Load("Image/too early.png");
             SDL_Texture* tooearlyTexture = SDL_CreateTextureFromSurface(renderer, tooearlySurface);
             SDL_FreeSurface(tooearlySurface);
-            
-            //thread to play gameplay music
-           
-           
-            //variable for gameplay
+            //variable for gameplay/////////////////////////////////
             time_t startTime = std::time(nullptr);
             time_t currentTime;
             time_t elapsedTime=0;
@@ -490,20 +492,18 @@ int main(int argc, char* args[]) {
             maxWave = 125;
             int demflash = 0;
             int controlFPS = 12;
-            //load game nếu file save game tồn tại và không bị trống
-           
+            ////////////////////////////////////////////////////////
+            //load save game////////////////////////////////////////////////////////////////////////////////////////
             ifstream file("gameState.txt");
-            // Kiểm tra xem file có tồn tại và không rỗng không
             bool choiceloadgame = false;
             if (file.good() && file.peek() != std::ifstream::traits_type::eof()) {
-                // File tồn tại và không rỗng, tải game
-               
                 SDL_Surface* loadgameSurface = IMG_Load("Image/continue_or_newgame.png");
                 SDL_Texture* loadgameTexture = SDL_CreateTextureFromSurface(renderer, loadgameSurface);
                 SDL_FreeSurface(loadgameSurface);
                 SDL_SetTextureColorMod(texture,50,50,50);
                 destinationRect = { 0,0, 1080, 810 };
                 SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
+                //menu load save game////////////////////////////////////////////////////////////////////////////////////////
                 while (true) {
                    SDL_RenderCopyEx(renderer,loadgameTexture,&destinationRect,&destinationRect,0.0,NULL,SDL_FLIP_NONE);
 					SDL_RenderPresent(renderer);
@@ -525,9 +525,9 @@ int main(int argc, char* args[]) {
                     }
 
                 }
-                
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                // Load các biến
+                // Load variable///////////////////////////////////
                 if (choiceloadgame == true) {
                     file >> demSpeed;
                     file >> demWave;
@@ -543,14 +543,12 @@ int main(int argc, char* args[]) {
                     file >> tooearly;
                     file >> waitlongnood;
                     file >> demlight;
-                  
+                    file >> controlFPS;
                     file >> startTime;
                     file >> elapsedTime;
-
-                    // Set lại startTime
-
-
-                    // Load vector noods
+                                //////////////////////////////////////
+                   
+                    // Load vector noods//////////////////////////////////////
                     int x, y, type;
                     bool check;
                     while (file >> x >> y >> check >> type) {
@@ -584,55 +582,88 @@ int main(int argc, char* args[]) {
 
                         }
                     }
-
+////////////////////////////////////////////////////////////////////////////////
                     file.close();
-
-                    // Xóa file sau khi đã tải xong
+                    //remore file save game
                     std::remove("gameState.txt");
                     if (elapsedTime >= 211) {
                         texture = redbackgroundTexture;
                     }
-                    // nghỉ 1s để chờ nhạc chạy
-
-                   
+                    //delay to load game
                     SDL_Delay(1000);
                 }
             }
-           
+            //menu choose level////////////////////////////////////////////////////////////////////////////////////////
+            if (choiceloadgame == false) {
+                SDL_Surface* choose_levelSurface = IMG_Load("Image/choose_level.png");
+                SDL_Texture* chooseLevelTexture = SDL_CreateTextureFromSurface(renderer, choose_levelSurface);
+                SDL_FreeSurface(choose_levelSurface);
+                SDL_SetTextureColorMod(texture, 50, 50, 50);
+                destinationRect = { 0,0, 1080, 810 };
+                SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
+                while (true) {
+                    SDL_RenderCopyEx(renderer,chooseLevelTexture, &destinationRect, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
+                    SDL_RenderPresent(renderer);
+                    SDL_Event e;
+                    SDL_PollEvent(&e);
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    if (e.type == SDL_MOUSEBUTTONDOWN) {
+                        if (y > 275, y < 400) {
+                            if (x > 150, x < 425) {
+                                controlFPS = 12;
+                                break;
+                            }
+                            else if (x > 650, x < 975) {
+                                controlFPS = 8;
+                                break;
+                            }
+                        }
+                        if (y <= 225 && y >= 100) {
+                            if (x >= 400 && x <= 650) {
+                                controlFPS = 6;
+                                break;
+                            }
+						}
+                    }
+
+                }
+           }
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////
             SDL_DestroyTexture(menuTexture);
             SDL_DestroyTexture(menu1Texture);
             SDL_DestroyTexture(menu2Texture);
             SDL_DestroyTexture(menu3Texture);
             clearFile("gameState.txt");
+            //change background for gameplay//////////////////////
             texture = backgroundTexture;
             if (choiceloadgame) {
                 time_t currentTime = time(0);
                 startTime = currentTime - elapsedTime;
             }
-
+            /////////////////////////////////////////////////////
+            //music gameplay/////////////////////////////////////////////
             t1 = std::thread([&music,elapsedTime,choiceloadgame]() {
-                Mix_PlayMusic(music, -1);
+                Mix_PlayMusic(music, 0);
                 if (choiceloadgame) {
                     Mix_SetMusicPosition(elapsedTime);
                 }
                 });
             t1.join();
-           
+           //////////////////////////////////////////////////////////////
+            //main loop of gameplay////////////////////////////////////////////////////////////////////////////////
             while (gameplay) {
-               
-                
-                // check time after each loop
                  currentTime = std::time(nullptr);
                 elapsedTime = currentTime - startTime;
-               
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
                         quit = true;
                         gameplay = false;
                         //save game
-                        saveGameState(noods, demSpeed, demWave, demNood, speed, demsp, maxWave, demkey, demperfect, perfect, good, miss, tooearly, waitlongnood, demlight, startTime, elapsedTime);
+                        saveGameState(noods, demSpeed, demWave, demNood, speed, demsp, maxWave, demkey, demperfect, perfect, good, miss, tooearly, waitlongnood, demlight,controlFPS, startTime, elapsedTime);
                     }
                 }
+                //change background for gameplay//////////////////////
                 if (elapsedTime == 0) texture = backgroundTexture;
                 else if (elapsedTime == 211) texture = redbackgroundTexture;
                 if (demlight >= 50*(6/speed)) {
@@ -643,12 +674,15 @@ int main(int argc, char* args[]) {
 					else texture = backgroundTexture;
 				}
                 demlight++;
+                ///////////////////////////////////////////////////////
+                //create effect of gameplay/////////////////////////////////////////////////////
                 destinationRect = { 0,0, 1080, 810 };
-                Uint8 brightness = 150 * (sin(SDL_GetTicks() / 500.0*speed/6) + 1) / 2+105; // Tạo hiệu ứng nhấp nháy
+                Uint8 brightness = 150 * (sin(SDL_GetTicks() / 500.0*speed/6) + 1) / 2+105; 
                 SDL_SetTextureColorMod(texture, brightness, brightness, brightness);
                 SDL_RenderCopyEx(renderer, texture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
                 demSpeed += 1;
-               
+               ////////////////////////////////////////////////////////////////////////////////////
+                ///voice change round of gameplay///////////////////////////////////////////////
                 if (elapsedTime == 210) {
                     //chỉnh âm lương cho voice
                     Mix_Chunk* voicemusic = Mix_LoadWAV("music/voice.mp3");
@@ -660,11 +694,13 @@ int main(int argc, char* args[]) {
                    Mix_PlayChannel(-1, voicemusic, 0);
                    
                 }
-                //control speed, create wave nood
+                ////////////////////////////////////////////////////////////////////////////////////
+                //control speed, create wave nood///////////////////////////////////////////////////////////////////////
                 if (demSpeed >= 1) {
                     demSpeed = 0;
                     for (Noods*& x : noods) {
                         if (x->check == true) {
+                            //clear miss nood///////////////////////////////
                             if (x->y >= 810&&(x->type==0||x->type==2)) {
                                 x->check = false;
                                
@@ -694,22 +730,22 @@ int main(int argc, char* args[]) {
                                 SDL_RenderCopyEx(renderer, x->a, NULL, &noodrect, 0.0, NULL, SDL_FLIP_NONE);
                             }
                         }
-
+                        //////////////////////////////////////////////////////
 
                     }
                     demWave += 2;
                     // wave of nood
                     if (demWave >= maxWave && waitlongnood <= 0) {
                         demWave = 0;
-                        //create new wave nood
+                        //create new wave nood////////////////////////////////////////////////////////////////////////
                         vector<int> position = creatpositionofnood(creatnumberofnood());
-                        if (elapsedTime <= 268 && !(elapsedTime >= 206 && elapsedTime <= 210)) {
+                        if (elapsedTime <= 270 && !(elapsedTime >= 206 && elapsedTime <= 210)) {
                             int type = generateRandomNumber(1, 10);
-                            if (elapsedTime < 10|| type>3) {
+                            if (elapsedTime < 10|| type>3) {///type 0 or 2/////////////////////
                                 for (int i = 0; i < position.size(); i++) {
                                     Noods* nood = new Noods;
                                     int ratebombnood = generateRandomNumber(1, 10);
-                                    if (ratebombnood == 1&&elapsedTime>=211) {
+                                    if (ratebombnood == 1&&elapsedTime>=211) {///type 2/////////////////////
 										nood->a = bombTexture;
 										nood->type = 2;
 									}
@@ -724,7 +760,7 @@ int main(int argc, char* args[]) {
                                     noods.push_back(nood);
                                 }
                             }
-                            else {
+                            else {///type 1/////////////////////
                                 int length = generateRandomNumber(250, 500);
                                 int ranDom = 0;
                                 if (position.size() >= 4) {
@@ -772,15 +808,16 @@ int main(int argc, char* args[]) {
                     }
                     else if (waitlongnood > 0) waitlongnood -= 3;
                 }
+                //delete nood if nood out of screen////////////
                 if (noods.size() > 50) {
-                    //giải phóng bộ nhớ và xóa 30 phần tử đầu
                     for (int i = 0; i < 30; i++) {
                         delete noods[i];
                     }
                     noods.erase(noods.begin(), noods.begin() + 30);
                 }
+                /////////////////////////////////////////////////
                 //demkey to reduce stick key
-                    //main gameplay get point and check correct nood be pressed
+                    //main gameplay get point and check correct nood be pressed/////////////////////////////////////////////////
                 if (demkey <= 0) {
                     for (Noods*& x : noods) {
                         bool check = true;
@@ -791,10 +828,12 @@ int main(int argc, char* args[]) {
 
                         }
                         if (check) {
+                            ///change type 
                             if (x->type == 1) {
                                 Longnoods* y = (Longnoods*)x;
                                 y->y += y->length;
                             }
+                            ///check correct nood be pressed///////////////////////////////////////////////////////////////////////
                             if (x->check == true && x->y >= 525 && x->y <= 800) {
                                 if (x->x == 59 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_S]) {
 
@@ -830,9 +869,9 @@ int main(int argc, char* args[]) {
                                         demflash = 325;
                                         Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
                                         thread flashMusicThread([&flashmusic]() {
-                                            //chỉnh âm lượng cho flash music
+                                           
                                             Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
-                                            //chinh âm lượng cho music
+                                           
 
                                             Mix_PlayChannel(-1, flashmusic, 0);
                                             });
@@ -872,10 +911,9 @@ int main(int argc, char* args[]) {
                                         demflash = 325;
                                         Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
                                         thread flashMusicThread([&flashmusic]() {
-                                            //chỉnh âm lượng cho flash music
+                                           
                                             Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
-                                            //chinh âm lượng cho music
-
+                                            
                                             Mix_PlayChannel(-1, flashmusic, 0);
                                             });
                                         flashMusicThread.detach();
@@ -914,10 +952,9 @@ int main(int argc, char* args[]) {
                                         demflash = 325;
                                         Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
                                         thread flashMusicThread([&flashmusic]() {
-                                            //chỉnh âm lượng cho flash music
+                                            
                                             Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
-                                            //chinh âm lượng cho music
-
+                                          
                                             Mix_PlayChannel(-1, flashmusic, 0);
                                             });
                                         flashMusicThread.detach();
@@ -955,10 +992,9 @@ int main(int argc, char* args[]) {
                                         demflash = 325;
                                         Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
                                         thread flashMusicThread([&flashmusic]() {
-                                            //chỉnh âm lượng cho flash music
+                                          
                                             Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
-                                            //chinh âm lượng cho music
-
+                                          
                                             Mix_PlayChannel(-1, flashmusic, 0);
                                             });
                                         flashMusicThread.detach();
@@ -996,10 +1032,9 @@ int main(int argc, char* args[]) {
                                         demflash = 325;
                                         Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
                                         thread flashMusicThread([&flashmusic]() {
-                                            //chỉnh âm lượng cho flash music
+                                          
                                             Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
-                                            //chinh âm lượng cho music
-
+                                        
                                             Mix_PlayChannel(-1, flashmusic, 0);
                                             });
                                         flashMusicThread.detach();
@@ -1037,16 +1072,16 @@ int main(int argc, char* args[]) {
                                         demflash = 325;
                                         Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
                                         thread flashMusicThread([&flashmusic]() {
-                                            //chỉnh âm lượng cho flash music
+                                           
                                             Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME * 0.3);
-                                            //chinh âm lượng cho music
+                                         
 
                                             Mix_PlayChannel(-1, flashmusic, 0);
                                             });
                                         flashMusicThread.detach();
                                     }
                                 }
-                                
+                                /////////////////////////////////////////////////////////////////////////////////////////
                                 demkey=10;
 
                             }
@@ -1073,6 +1108,7 @@ int main(int argc, char* args[]) {
                                 miss++; choice = 0; demperfect = 5;
                                 demsleep++;
                             }
+                            ///check long nood be pressed//////////////////////////////////////////////////////////////
                             else if (y->isbeinghold == true) {
                                 if (y->y <= 800) {
                                     if (y->x == 59 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_S]) {
@@ -1136,12 +1172,13 @@ int main(int argc, char* args[]) {
                             }
                             demkey = 15;
                         }
+                        ////////////////////////////////////////////////////////////////////////////////////////////////
                     }
 
                 }
                 else demkey--;
-               
-              
+               //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+              ///pause game/////////////////////////////////////////////////////////////////////////////////
                     if (SDL_GetKeyboardState(NULL)[SDL_SCANCODE_ESCAPE]) {
 
                         Mix_PauseMusic();
@@ -1151,13 +1188,14 @@ int main(int argc, char* args[]) {
                         destinationRect = { 230,200, 600, 450 };
                         SDL_RenderCopyEx(renderer, pauseTexture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
                         SDL_RenderPresent(renderer);
+                        //menu pause game////////////////////////////////////////////////////////////////////////////////////////
                         while (true) {
                             if (SDL_PollEvent(&e)) {
                                 if (e.type == SDL_QUIT) {
 									quit = true;
 									gameplay = false;
 									//save game
-									saveGameState(noods, demSpeed, demWave, demNood, speed, demsp, maxWave, demkey, demperfect, perfect, good, miss, tooearly, waitlongnood, demlight, startTime, elapsedTime);
+									saveGameState(noods, demSpeed, demWave, demNood, speed, demsp, maxWave, demkey, demperfect, perfect, good, miss, tooearly, waitlongnood, demlight,controlFPS, startTime, elapsedTime);
 									break;
 								}
 							}
@@ -1175,10 +1213,7 @@ int main(int argc, char* args[]) {
                                 else if (x > 320 && x < 440 && y > 510 && y < 580) {
                                     // Quit button clicked
                                     noods.resize(0);
-                                    std::thread t1([&music]() {
-                                        Mix_PlayMusic(music, -1);
-                                        if (music == NULL) Mix_PlayMusic(music, -1);
-                                        });
+                                   
                                     t1.join();
                                     perfect = 0;
                                     good = 0;
@@ -1199,6 +1234,7 @@ int main(int argc, char* args[]) {
 
                                 }
                                 else if (y > 510 && y < 580 && x>610 && x < 730) {
+                                    //replay button clicked
                                     gameplay = false;
                                     noods.resize(0);
                                     break;
@@ -1208,10 +1244,10 @@ int main(int argc, char* args[]) {
                         SDL_DestroyTexture(pauseTexture);
                      
                     }
-                
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 
               
-                //code for display result of nood be pressed
+                //code for display result of nood be pressed/////////////////////////////////////////////////////////////////////////
                 if (demperfect >= 0) {
                     demperfect--;
                     //thread to display result
@@ -1226,43 +1262,13 @@ int main(int argc, char* args[]) {
 
                     t2.join();
                 }
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //renderer gameplay
-                          //if q is pressed
-                if (SDL_GetKeyboardState(NULL)[SDL_SCANCODE_Q]) {
-                    demflash = 325;
-                    Mix_VolumeMusic(MIX_MAX_VOLUME * 0.3);
-                    thread flashMusicThread([&flashmusic]() {
-                        //chỉnh âm lượng cho flash music
-                        Mix_VolumeChunk(flashmusic, MIX_MAX_VOLUME*0.3);
-                       //chinh âm lượng cho music
-                        					
-						Mix_PlayChannel(-1,flashmusic, 0);
-						});
-                    flashMusicThread.detach();
-                }
-                if (demflash > 0) {
-                    demflash--;
-                    // Calculate the elapsed time
-                    
-                    
-                    // Calculate the alpha value using a sin function
-                    Uint8 alpha = 128 * (sin(SDL_GetTicks() / 2000.0) + 1);
-
-                    // Set the alpha mod of the white texture
-                    SDL_SetTextureAlphaMod(whiteTexture, alpha);
-
-                    // Render the white texture over the entire screen
-                    SDL_RenderCopy(renderer, whiteTexture, NULL, NULL);
-
-                    if (demflash == 1) {
-                        Mix_VolumeMusic(MIX_MAX_VOLUME);
-                    }
-				}
                 SDL_RenderPresent(renderer);
-             
+             //control FPS
                 SDL_Delay(controlFPS);
-               //check to end game
-                if (((size(noods) == 0 || noods.back()->check == false) && elapsedTime >= 272)||demsleep>=50) {
+               //check to end game////////////////////////////////////////////////////////////////////////////////////////
+                if (((size(noods) == 0 || noods.back()->check == false) && elapsedTime > 272)||demsleep>=50) {
                     Mix_HaltMusic();
                     //end music
                     Mix_Music* end = Mix_LoadMUS("music/end.mp3");
@@ -1316,7 +1322,6 @@ int main(int argc, char* args[]) {
                    SDL_Texture* texture;
                    SDL_Rect textRect;
                    if (demsleep >= 20) {
-                       //write "Are you sleeping?"
                        
                        surface = TTF_RenderText_Solid(font, "Are you sleeping?", color);
                        texture = SDL_CreateTextureFromSurface(renderer, surface);
@@ -1378,8 +1383,9 @@ int main(int argc, char* args[]) {
 					TTF_Quit();
 					});
 					t3.join();
+                    ///////////////////////////////////////////////////////////////////////////////////////////
 					SDL_RenderPresent(renderer);
-                    //completed loop
+                    //completed loop////////////////////////////////////////////////////////////////////////////////////////
                     while (true) {
 						//check button be clicked
 						SDL_PollEvent(&e);
@@ -1396,8 +1402,8 @@ int main(int argc, char* args[]) {
                                 gameplay = true;
                                 noods.resize(0);
                                 std::thread t1([&music]() {
-                                    Mix_PlayMusic(music, -1);
-                                    if (music == NULL) Mix_PlayMusic(music, -1);
+                                    Mix_PlayMusic(music, 0);
+                                 
                                     });
                                 t1.join();
                                 //time reset
@@ -1414,10 +1420,8 @@ int main(int argc, char* args[]) {
                             //quit button
                             else if (x > 680 && x < 860 && y > 610 && y < 780) {
 								noods.resize(0);
-                                std::thread t1([&music]() {
-									Mix_PlayMusic(music, -1);
-									if (music == NULL) Mix_PlayMusic(music, -1);
-									});
+                              
+
 								t1.join();
 								perfect = 0;
 								good = 0;
@@ -1449,6 +1453,7 @@ int main(int argc, char* args[]) {
                     Mix_FreeMusic(end);
                     
                 }
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //check time
                 cout << elapsedTime<<" ";
                 cout<<speed<<" "<<maxWave<<endl;
