@@ -1263,6 +1263,14 @@ int main(int argc, char* args[]) {
                     t2.join();
                 }
                 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                ///catch and slove flash event////////////////////////////////////////////////////////////////////////
+                if (demflash > 0) {                                                                         ////
+                    demflash--;																			 ////
+                    SDL_Rect destinationRect = { 0,0, 1080, 810 };										 ////
+                    SDL_SetTextureColorMod(whiteTexture, 255, 255, 255);									 ////
+                    SDL_RenderCopyEx(renderer, whiteTexture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);////
+                }																							////
+                /////////////////////////////////////////////////////////////////////////////////////////////////////
                 //renderer gameplay
                 SDL_RenderPresent(renderer);
              //control FPS

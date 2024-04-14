@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\ttk08\\OneDrive\\Documents\\GitHub\\project\\Project2\\",
+  "WorkspaceRootPath": "C:\\Users\\ttk08\\Downloads\\Rhythm-Rush-project___SDL_game___\\Project2\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E890861A-5B30-4DE3-978E-83CD16B7D799}|Project2\\Project2.vcxproj|C:\\Users\\ttk08\\OneDrive\\Documents\\GitHub\\project\\Project2\\Project2\\Source.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{E890861A-5B30-4DE3-978E-83CD16B7D799}|Project2\\Project2.vcxproj|C:\\Users\\ttk08\\Downloads\\Rhythm-Rush-project___SDL_game___\\Project2\\Project2\\Source.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{E890861A-5B30-4DE3-978E-83CD16B7D799}|Project2\\Project2.vcxproj|solutionrelative:Project2\\Source.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
@@ -28,11 +28,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Source.cpp",
-              "DocumentMoniker": "C:\\Users\\ttk08\\OneDrive\\Documents\\GitHub\\project\\Project2\\Project2\\Source.cpp",
+              "DocumentMoniker": "C:\\Users\\ttk08\\Downloads\\Rhythm-Rush-project___SDL_game___\\Project2\\Project2\\Source.cpp",
               "RelativeDocumentMoniker": "Project2\\Source.cpp",
-              "ToolTip": "C:\\Users\\ttk08\\OneDrive\\Documents\\GitHub\\project\\Project2\\Project2\\Source.cpp",
+              "ToolTip": "C:\\Users\\ttk08\\Downloads\\Rhythm-Rush-project___SDL_game___\\Project2\\Project2\\Source.cpp",
               "RelativeToolTip": "Project2\\Source.cpp",
-              "ViewState": "AQIAAHYFAAAAAAAAAAAAAJYAAAAAAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAA3AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-04-12T16:19:24.592Z",
               "EditorCaption": ""
