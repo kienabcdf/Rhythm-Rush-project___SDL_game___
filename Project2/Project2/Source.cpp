@@ -421,9 +421,9 @@ int main(int argc, char* args[]) {
 	  }																			  /////////////
      ///////////////////////////////////////////////////////////////////////////////////////////////////
      //chỉnh âm lượng max cho các tik music////////////////////////////
-     Mix_VolumeChunk(tikmusiclist[0], MIX_MAX_VOLUME );             //
-     Mix_VolumeChunk(tikmusiclist[1], MIX_MAX_VOLUME );			 //
-     Mix_VolumeChunk(tikmusiclist[2], MIX_MAX_VOLUME );			 //
+     Mix_VolumeChunk(tikmusiclist[0], MIX_MAX_VOLUME*0.7);             //
+     Mix_VolumeChunk(tikmusiclist[1], MIX_MAX_VOLUME*0.7);			 //
+     Mix_VolumeChunk(tikmusiclist[2], MIX_MAX_VOLUME*0.7);			 //
      //////////////////////////////////////////////////////////////////
         //setup for gameplay
         if (gameplay == true) {
@@ -492,6 +492,8 @@ int main(int argc, char* args[]) {
             maxWave = 125;
             int demflash = 0;
             int controlFPS = 12;
+            //change background for gameplay//////////////////////
+            texture = backgroundTexture;
             ////////////////////////////////////////////////////////
             //load save game////////////////////////////////////////////////////////////////////////////////////////
             ifstream file("gameState.txt");
@@ -586,7 +588,7 @@ int main(int argc, char* args[]) {
                     file.close();
                     //remore file save game
                     std::remove("gameState.txt");
-                    if (elapsedTime >= 211) {
+                    if (elapsedTime >= 212) {
                         texture = redbackgroundTexture;
                     }
                     //delay to load game
@@ -615,13 +617,13 @@ int main(int argc, char* args[]) {
                                 break;
                             }
                             else if (x > 650, x < 975) {
-                                controlFPS = 8;
+                                controlFPS = 9;
                                 break;
                             }
                         }
                         if (y <= 225 && y >= 100) {
                             if (x >= 400 && x <= 650) {
-                                controlFPS = 6;
+                                controlFPS = 7;
                                 break;
                             }
 						}
@@ -635,11 +637,13 @@ int main(int argc, char* args[]) {
             SDL_DestroyTexture(menu2Texture);
             SDL_DestroyTexture(menu3Texture);
             clearFile("gameState.txt");
-            //change background for gameplay//////////////////////
-            texture = backgroundTexture;
+           
             if (choiceloadgame) {
                 time_t currentTime = time(0);
                 startTime = currentTime - elapsedTime;
+            }
+            else {
+                startTime = std::time(nullptr);
             }
             /////////////////////////////////////////////////////
             //music gameplay/////////////////////////////////////////////
@@ -653,6 +657,7 @@ int main(int argc, char* args[]) {
            //////////////////////////////////////////////////////////////
             //main loop of gameplay////////////////////////////////////////////////////////////////////////////////
             while (gameplay) {
+                double musicTime = Mix_GetMusicPosition(music);
                  currentTime = std::time(nullptr);
                 elapsedTime = currentTime - startTime;
                 while (SDL_PollEvent(&e) != 0) {
@@ -665,7 +670,7 @@ int main(int argc, char* args[]) {
                 }
                 //change background for gameplay//////////////////////
                 if (elapsedTime == 0) texture = backgroundTexture;
-                else if (elapsedTime == 211) texture = redbackgroundTexture;
+                else if (elapsedTime == 212) texture = redbackgroundTexture;
                 if (demlight >= 50*(6/speed)) {
 					demlight = 0;
 					if (texture == backgroundTexture) texture = darkbackgroundTexture;
@@ -683,7 +688,7 @@ int main(int argc, char* args[]) {
                 demSpeed += 1;
                ////////////////////////////////////////////////////////////////////////////////////
                 ///voice change round of gameplay///////////////////////////////////////////////
-                if (elapsedTime == 210) {
+                if (elapsedTime == 211) {
                     //chỉnh âm lương cho voice
                     Mix_Chunk* voicemusic = Mix_LoadWAV("music/voice.mp3");
                     if (voicemusic == NULL) {
@@ -739,12 +744,12 @@ int main(int argc, char* args[]) {
                         demWave = 0;
                         //create new wave nood////////////////////////////////////////////////////////////////////////
                         vector<int> position = creatpositionofnood(creatnumberofnood());
-                        if (elapsedTime <= 270 && !(elapsedTime >= 206 && elapsedTime <= 210)) {
+                        if (elapsedTime <= 269 && !(elapsedTime >= 206 && elapsedTime <= 212)) {
                             int type = generateRandomNumber(1, 10);
-                            if (elapsedTime < 10|| type>3) {///type 0 or 2/////////////////////
+                            if (elapsedTime < 10|| type>2) {///type 0 or 2/////////////////////
                                 for (int i = 0; i < position.size(); i++) {
                                     Noods* nood = new Noods;
-                                    int ratebombnood = generateRandomNumber(1, 10);
+                                    int ratebombnood = generateRandomNumber(1, 15);
                                     if (ratebombnood == 1&&elapsedTime>=211) {///type 2/////////////////////
 										nood->a = bombTexture;
 										nood->type = 2;
@@ -798,9 +803,14 @@ int main(int argc, char* args[]) {
                         demsp++;
                         if (demsp >= 23) {
                             
-                            if (maxWave > 60&&(demsp==23||demsp==40)) maxWave -= 5;
+                            if (maxWave > 60 && (demsp == 23 || demsp == 40)) {
+                                maxWave -= 5;
+                                if(controlFPS<=8&&speed==10&&maxWave<=60*12/speed+5) maxWave += 5;
+                            }
                             if (speed < 12&&demsp>=40) {
                                 speed += 1;
+                                if (controlFPS == 10 && speed > 10) speed--;
+                                else if (controlFPS == 8 && speed > 10) speed--;
                                 demsp = 0;
                             }
                           
@@ -1187,10 +1197,12 @@ int main(int argc, char* args[]) {
                         SDL_FreeSurface(pauseSurface);
                         destinationRect = { 230,200, 600, 450 };
                         SDL_RenderCopyEx(renderer, pauseTexture, NULL, &destinationRect, 0.0, NULL, SDL_FLIP_NONE);
+
                         SDL_RenderPresent(renderer);
                         //menu pause game////////////////////////////////////////////////////////////////////////////////////////
                         while (true) {
-                            if (SDL_PollEvent(&e)) {
+                            
+                          
                                 if (e.type == SDL_QUIT) {
 									quit = true;
 									gameplay = false;
@@ -1198,7 +1210,7 @@ int main(int argc, char* args[]) {
 									saveGameState(noods, demSpeed, demWave, demNood, speed, demsp, maxWave, demkey, demperfect, perfect, good, miss, tooearly, waitlongnood, demlight,controlFPS, startTime, elapsedTime);
 									break;
 								}
-							}
+						
                             //if mouse click
                             SDL_PollEvent(&e);
                             if (e.type == SDL_MOUSEBUTTONDOWN) {
@@ -1211,10 +1223,13 @@ int main(int argc, char* args[]) {
                                     break;
                                 }
                                 else if (x > 320 && x < 440 && y > 510 && y < 580) {
-                                    // Quit button clicked
+                                    //replay button be clicked
                                     noods.resize(0);
-                                   
-                                    t1.join();
+                                    std::thread t1([&music]() {
+                                        Mix_PlayMusic(music, 0);
+
+                                        });
+                                    t1.detach();
                                     perfect = 0;
                                     good = 0;
                                     miss = 0;
@@ -1229,16 +1244,17 @@ int main(int argc, char* args[]) {
                                     speed = 6;
                                     demsp = 0;
                                     maxWave = 125;
-                                    
+
                                     break;
 
                                 }
                                 else if (y > 510 && y < 580 && x>610 && x < 730) {
-                                    //replay button clicked
+                                    //quit button
                                     gameplay = false;
                                     noods.resize(0);
                                     break;
                                 }
+                                else continue;
                             }
                         }
                         SDL_DestroyTexture(pauseTexture);
@@ -1276,7 +1292,7 @@ int main(int argc, char* args[]) {
              //control FPS
                 SDL_Delay(controlFPS);
                //check to end game////////////////////////////////////////////////////////////////////////////////////////
-                if (((size(noods) == 0 || noods.back()->check == false) && elapsedTime > 272)||demsleep>=50) {
+                if (((size(noods) == 0 || noods.back()->check == false) && elapsedTime > 271)||demsleep>=100) {
                     Mix_HaltMusic();
                     //end music
                     Mix_Music* end = Mix_LoadMUS("music/end.mp3");
@@ -1329,7 +1345,7 @@ int main(int argc, char* args[]) {
                    SDL_Surface* surface;
                    SDL_Texture* texture;
                    SDL_Rect textRect;
-                   if (demsleep >= 20) {
+                   if (demsleep >= 75) {
                        
                        surface = TTF_RenderText_Solid(font, "Are you sleeping?", color);
                        texture = SDL_CreateTextureFromSurface(renderer, surface);
@@ -1429,7 +1445,10 @@ int main(int argc, char* args[]) {
                             else if (x > 680 && x < 860 && y > 610 && y < 780) {
 								noods.resize(0);
                               
+                                std::thread t1([&music]() {
+                                    Mix_PlayMusic(music, 0);
 
+                                    });
 								t1.join();
 								perfect = 0;
 								good = 0;
