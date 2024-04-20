@@ -10,7 +10,7 @@ Full name: Tran Trung Kien
 
 Student ID: 23020087
 
-Achievement: Aim to achieve a score of 9.5, with the following reasons:
+Achievement: Aim to achieve a score of 10, with the following reasons:
 
 # Features:
 
