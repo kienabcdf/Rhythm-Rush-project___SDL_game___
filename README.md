@@ -11,7 +11,7 @@ Full name: Tran Trung Kien
 Student ID: 23020087
 
 ## Preview video
-[![Watch the video](https://drive.google.com/file/d/1ZEJkzWQ2I0DpLz09RvnyS0XhjpnVZF-K/view?usp=drive_link)
+[Watch the demo video](https://drive.google.com/file/d/1ZEJkzWQ2I0DpLz09RvnyS0XhjpnVZF-K/view?usp=drive_link)
 # Features:
 
 Engaging rhythm-based gameplay with exciting challenges.
